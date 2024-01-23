@@ -1,34 +1,49 @@
-# xhs-electron-app
+# 小红书工具
 
-An Electron application with Vue and TypeScript
+## 功能
+[x] 显示自己的笔记列表
+  - 监听me接口
+  - 拿到userId后切换到我的这一栏
+  - 等待页面加载，获取dom
 
-## Recommended IDE Setup
+[x] 支持监听获取某篇笔记下的所有评论（一级评论）
+  - 输入笔记ID，跳转笔记页面
+  - 监听`sns/web/v2/comment/page?note_id=xxx`接口（如果是未登录，只有部分数据）
+  - 等待页面加载，获取DOM
+    - 分页情况
+    - 子评论情况
+  - 最终：暂时支持最多100条一级评论，二级不考虑
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin)
+[x] 支持监听笔记评论，设置自动回复
+  - 背景：可能会发一些引流笔记，对留言的评论，需要及时回复，比如私信等
+  - 支持自定义回复文本
+    - 输入笔记ID，仅支持自己的笔记
+    - 监听评论成功接口，记录评论id，用户Id
+    - 跟数据库对比，找是否该评论id，已回复的数据
+    - 定时刷新，自动分页，重复上面逻辑
+    - 其他
+      - 过滤非自己的评论（都行
+      - 可以设置某段时间运行，以释放资源
+  - 结束监听
 
-## Project Setup
+[] 发布笔记
+  - 背景
+  - 支持视频发布
+  - 支持图文发布
+  - 问题
+    - 发布笔记两个域名处理的逻辑不一样，token容易有问题
+    - 暂时搁置
 
-### Install
+[] 提供webui操作界面
+  - 自定义顶部操作（logo标题 + 最小化放大关闭区域）
+  - 主区域
+    - 左边账号管理，已登陆、账号状态、添加新账号
+    - 右边，分tab管理
+      - 笔记列表
+        - 展示笔记的详情，封面，状态（监听状态），自定义回复
+        - 操作按钮（取消监听
+      - 粉丝列表
 
-```bash
-$ yarn
-```
+[] 自动点赞
 
-### Development
-
-```bash
-$ yarn dev
-```
-
-### Build
-
-```bash
-# For windows
-$ yarn build:win
-
-# For macOS
-$ yarn build:mac
-
-# For Linux
-$ yarn build:linux
-```
+[] 自动评论

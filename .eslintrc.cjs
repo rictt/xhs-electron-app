@@ -14,6 +14,7 @@ module.exports = {
     'vue/require-default-prop': 'off',
     'vue/multi-word-component-names': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
-    'no-async-promise-executor': 'off'
+    'no-async-promise-executor': 'off',
+    '@typescript-eslint/no-unused-vars': 'off'
   }
 }

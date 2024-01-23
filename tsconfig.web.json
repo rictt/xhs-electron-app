@@ -9,6 +9,7 @@
     "src/ipc.ts"
   ],
   "compilerOptions": {
+    "allowJs": true,
     "strict": false,
     "composite": true,
     "baseUrl": ".",
