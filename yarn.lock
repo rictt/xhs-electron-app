@@ -2858,6 +2858,13 @@ lodash@^4.17.15, lodash@^4.17.21:
   resolved "https://registry.npmmirror.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
+lowdb@^7.0.1:
+  version "7.0.1"
+  resolved "https://registry.npmmirror.com/lowdb/-/lowdb-7.0.1.tgz#7354a684547d76206b1c730b9434604235b125e5"
+  integrity sha512-neJAj8GwF0e8EpycYIDFqEPcx9Qz4GUho20jWFR7YiFeXzF1YMLdxB36PypcTSPMA+4+LvgyMacYhlr18Zlymw==
+  dependencies:
+    steno "^4.0.2"
+
 lowercase-keys@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmmirror.com/lowercase-keys/-/lowercase-keys-2.0.0.tgz#2603e78b7b4b0006cbca2fbcc8a3202558ac9479"
@@ -3612,6 +3619,11 @@ stat-mode@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmmirror.com/stat-mode/-/stat-mode-1.0.0.tgz#68b55cb61ea639ff57136f36b216a291800d1465"
   integrity sha512-jH9EhtKIjuXZ2cWxmXS8ZP80XyC3iasQxMDV8jzhNJpfDb7VbQLVW4Wvsxz9QZvzV+G4YoSfBUVKDOyxLzi/sg==
+
+steno@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.npmmirror.com/steno/-/steno-4.0.2.tgz#9bd9b0ffc226a1f9436f29132c8b8e7199d22c50"
+  integrity sha512-yhPIQXjrlt1xv7dyPQg2P17URmXbuM5pdGkpiMB3RenprfiBlvK415Lctfe0eshk90oA7/tNq7WEiMK8RSP39A==
 
 streamx@^2.15.0:
   version "2.15.6"
