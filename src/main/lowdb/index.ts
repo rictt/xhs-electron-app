@@ -3,12 +3,6 @@ import { JSONFileSync } from 'lowdb/node'
 import { app } from 'electron'
 import { join } from 'path'
 
-type AccountItem = {
-  ownerId: string
-  baseCookie: string
-  creatorCookie?: string
-  id: string
-}
 type NoteStatus = 'monitor' | 'idle'
 
 type NoteItem = {
@@ -21,7 +15,8 @@ type NoteItem = {
 }
 
 type Data = {
-  accounts: AccountItem[]
+  // accounts: AccountItem[]
+  accounts: XhsAccount[]
   notes: NoteItem[]
 }
 
@@ -60,13 +55,13 @@ class SystemDB {
     await this.db.read()
   }
 
-  async addAccount(account: AccountItem) {
-    account.id = Date.now() + ''
+  async addAccount(account: XhsAccount) {
+    // account.user_id = Date.now() + ''
     this.db.data.accounts.push(account)
     await this.db.write()
   }
   async removeAccount(accountId: string) {
-    this.db.data.accounts = this.db.data.accounts.filter((e) => e.id !== accountId)
+    this.db.data.accounts = this.db.data.accounts.filter((e) => e.user_id !== accountId)
     await this.db.write()
   }
 
@@ -90,4 +85,4 @@ class SystemDB {
   }
 }
 
-export const systemDb = new SystemDB('system')
+export const systemDb = new SystemDB()

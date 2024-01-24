@@ -1,9 +1,28 @@
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
-  "include": ["electron.vite.config.*", "src/ipc.ts", "src/main/**/*", "src/preload/*", "src/main/config/index.ts", "src/main/puppeteer/index.ts", "src/main/puppeteer/xhs.ts"],
+  "include": [
+    "electron.vite.config.*",
+    "src/shared/*",
+    "src/main/**/*",
+    "src/preload/*",
+    "src/main/config/index.ts",
+    "src/main/puppeteer/index.ts",
+    "src/main/puppeteer/xhs.ts"
+  ],
   "compilerOptions": {
     "strict": false,
     "composite": true,
-    "types": ["electron-vite/node"]
+    "types": [
+      "electron-vite/node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": [
+        "src/shared/*"
+      ],
+      "@main/*": [
+        "src/main/*"
+      ]
+    }
   }
 }

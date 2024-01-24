@@ -6,7 +6,8 @@
     "src/renderer/src/**/*.ts",
     "src/renderer/src/**/*.vue",
     "src/preload/*.d.ts",
-    "src/ipc.ts"
+    "src/shared/*",
+    "src/shared/*.d.ts",
   ],
   "compilerOptions": {
     "allowJs": true,
@@ -14,6 +15,9 @@
     "composite": true,
     "baseUrl": ".",
     "paths": {
+      "@shared/*": [
+        "src/shared/*"
+      ],
       "@renderer/*": [
         "src/renderer/src/*"
       ]

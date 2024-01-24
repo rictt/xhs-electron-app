@@ -1,6 +1,6 @@
-import { cookie, creator_cookie, creator_cookie_names } from '../config'
+import { creator_cookie_names } from '../config'
 
-export function getCookies() {
+export function getCookies(cookie: string, creator_cookie?: string) {
   const list1 = strToCookies(cookie, '.xiaohongshu.com')
 
   if (creator_cookie) {

@@ -1,0 +1,14 @@
+export const userInfo: XhsAccount = {
+  baseCookie: '',
+  creatorCookie: '',
+  guest: false,
+  red_id: '1609958969',
+  user_id: '61de601a0000000010009ee9',
+  nickname: '蟹老板美食记',
+  desc: '一个正儿八经广东人｜爱吃四川菜｜粤菜\n寻地道老广美食｜一起快乐吃喝不胖\n欢迎关注分享呀👏',
+  gender: 1,
+  images:
+    'https://sns-avatar-qc.xhscdn.com/avatar/1040g2jo30rs6rhol2k605oeuc0d417n98kfo7t0?imageView2/2/w/360/format/webp',
+  imageb:
+    'https://sns-avatar-qc.xhscdn.com/avatar/1040g2jo30rs6rhol2k605oeuc0d417n98kfo7t0?imageView2/2/w/540/format/webp'
+}

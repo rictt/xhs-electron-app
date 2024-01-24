@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
-import { NConfigProvider, GlobalThemeOverrides } from 'naive-ui'
+import { NConfigProvider, GlobalThemeOverrides, NMessageProvider } from 'naive-ui'
 
 const themeOverrides: GlobalThemeOverrides = {
   common: {
@@ -18,10 +18,12 @@ const themeOverrides: GlobalThemeOverrides = {
 
 <template>
   <NConfigProvider :theme-overrides="themeOverrides" style="height: 100%">
-    <div class="container">
-      <Left />
-      <Right />
-    </div>
+    <NMessageProvider>
+      <div class="container">
+        <Left />
+        <Right />
+      </div>
+    </NMessageProvider>
   </NConfigProvider>
 </template>
 

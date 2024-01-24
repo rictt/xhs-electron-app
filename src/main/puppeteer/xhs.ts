@@ -34,11 +34,11 @@ type Comment = {
 }
 
 export class Xhs extends EventEmitter {
+  page: Page
   rules: Rule[] = []
   userInfo: UserInfo
   user_id: string = '61de601a0000000010009ee9'
   max_comments_count: number = 100
-  page: Page
   loading: boolean = false
   commentMap: Map<string, Comment[]> = new Map()
   has_more_comments: boolean = true
@@ -78,13 +78,11 @@ export class Xhs extends EventEmitter {
           }
           if (json && json.success) {
             const request = response.request()
-            // const postData = request.postData()
-
             const query = extractQueryByUrl(request.url())
             const payload = extractBodyByPostData(request.postData())
             rule.handler(json.data, query, payload)
           } else {
-            console.log('request maybe fail, the response was ', response, json)
+            console.log('request failed, url is: ', url + ' response was: ', json)
           }
         }
       }
@@ -101,9 +99,34 @@ export class Xhs extends EventEmitter {
     fs.writeFileSync(p, JSON.stringify({ ...data, time: Date.now() }, null, 2))
   }
 
+  async validCookie() {
+    await this.page.goto('https://www.xiaohongshu.com/explore')
+    return new Promise((resolve, reject) => {
+      let timer = setTimeout(() => {
+        reject('timeout')
+      }, 1000 * 60)
+      this.once('meResponse', (data) => {
+        clearTimeout(timer)
+        timer = null
+        console.log('me response: ', data)
+        if (data.guest) {
+          reject('guest')
+        } else {
+          resolve(data)
+        }
+      })
+    })
+  }
+
   async onMeResponse(data) {
-    this.userInfo = data
-    this.user_id = data.user_id
+    console.log('me data: ', data)
+    if (!data.guest) {
+      this.userInfo = data
+      this.user_id = data.user_id
+      const p = path.join(__dirname, './meData.json')
+      fs.writeFileSync(p, JSON.stringify(data, null, 2))
+    }
+    this.emit('meResponse', data)
     await this.timeout()
   }
 
@@ -361,46 +384,45 @@ export class Xhs extends EventEmitter {
   async publishNotice() {
     // todo 笔记发布有问题
     // token使用窜了
-    await this.page.goto('https://creator.xiaohongshu.com/publish/publish')
-    await this.timeout()
-    await this.page.screenshot({ path: 'notice_1.png' })
-    console.log('已更新notice_1')
-    const uploadInput = await this.page.waitForSelector('.upload-input')
-    await uploadInput.uploadFile(
-      `/Users/joey/Desktop/文件/视频/1a78c8102cfb11ed8f7e1fdd57fdf4ce.mp4`
-    )
-    await this.timeout()
-    await this.page.waitForSelector('.c-input_inner')
-    await this.page.type('.c-input_inner', '可爱的小猫咪在洗澡也～', {
-      delay: 50
-    })
-    await this.page.screenshot({ path: 'notice_1_1.png' })
-    await this.page.waitForSelector('.post-content', { timeout: 60 })
-    await this.page.type('.post-content', '前言：可爱的小猫咪在洗澡～', {
-      delay: 50
-    })
-    // 出现封面 + 重新上传按钮才说明上传成功
-    await this.page.waitForSelector('.reUpload', {
-      timeout: 1000 * 2 * 60
-    })
-    await this.page.waitForSelector('.coverImg', {
-      timeout: 1000 * 2 * 60
-    })
-    await this.timeout()
-    await this.page.screenshot({ path: 'notice_2.png' })
-
-    await this.page.screenshot({ path: 'notice_3.png' })
-    await Promise.all([
-      this.page.waitForSelector('._title'),
-      this.page.waitForSelector('._title label')
-    ])
-    await this.page.$$eval('._title', (nodes: HTMLElement[]) => {
-      // 设置私密
-      nodes[1].querySelectorAll('label')[1].click()
-    })
-    await this.timeout()
-    await this.page.click('.publishBtn')
-    await this.page.screenshot({ path: 'notice_4.png' })
-    console.log('发布中')
+    // await this.page.goto('https://creator.xiaohongshu.com/publish/publish')
+    // await this.timeout()
+    // await this.page.screenshot({ path: 'notice_1.png' })
+    // console.log('已更新notice_1')
+    // const uploadInput = await this.page.waitForSelector('.upload-input')
+    // await uploadInput.uploadFile(
+    //   `/Users/joey/Desktop/文件/视频/1a78c8102cfb11ed8f7e1fdd57fdf4ce.mp4`
+    // )
+    // await this.timeout()
+    // await this.page.waitForSelector('.c-input_inner')
+    // await this.page.type('.c-input_inner', '可爱的小猫咪在洗澡也～', {
+    //   delay: 50
+    // })
+    // await this.page.screenshot({ path: 'notice_1_1.png' })
+    // await this.page.waitForSelector('.post-content', { timeout: 60 })
+    // await this.page.type('.post-content', '前言：可爱的小猫咪在洗澡～', {
+    //   delay: 50
+    // })
+    // // 出现封面 + 重新上传按钮才说明上传成功
+    // await this.page.waitForSelector('.reUpload', {
+    //   timeout: 1000 * 2 * 60
+    // })
+    // await this.page.waitForSelector('.coverImg', {
+    //   timeout: 1000 * 2 * 60
+    // })
+    // await this.timeout()
+    // await this.page.screenshot({ path: 'notice_2.png' })
+    // await this.page.screenshot({ path: 'notice_3.png' })
+    // await Promise.all([
+    //   this.page.waitForSelector('._title'),
+    //   this.page.waitForSelector('._title label')
+    // ])
+    // await this.page.$$eval('._title', (nodes: HTMLElement[]) => {
+    //   // 设置私密
+    //   nodes[1].querySelectorAll('label')[1].click()
+    // })
+    // await this.timeout()
+    // await this.page.click('.publishBtn')
+    // await this.page.screenshot({ path: 'notice_4.png' })
+    // console.log('发布中')
   }
 }

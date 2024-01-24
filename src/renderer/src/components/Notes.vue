@@ -23,6 +23,13 @@ const createColumns = () => {
       }
     },
     {
+      title: '回复文本',
+      key: 'replayText',
+      render: () => {
+        return '私[doge]'
+      }
+    },
+    {
       title: '操作',
       key: 'operator',
       render: (row: NoteType) => {
