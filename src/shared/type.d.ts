@@ -14,3 +14,14 @@ declare interface XhsAccount {
   images: string
   imageb: string
 }
+
+type NoteStatus = 'monitor' | 'idle'
+declare interface NoteDataItem {
+  note_href: string
+  note_id: string
+  user_id: string
+  title: string
+  count: string
+  cover: string
+  status?: NoteStatus
+}

@@ -9,7 +9,9 @@ export const enum IpcChannel {
 
   UpdateAccount = 'UpdateAccount',
 
-  GetAccountList = 'GetAccountList'
+  GetAccountList = 'GetAccountList',
+
+  GetNoteList = 'GetNoteList'
 }
 
 export type IpcMainEventList = {

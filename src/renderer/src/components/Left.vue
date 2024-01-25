@@ -1,14 +1,28 @@
 <script setup lang="tsx">
-import { FormInst, NButton, NSpace, NForm, NFormItem, NInput, NModal, useMessage } from 'naive-ui'
+import {
+  FormInst,
+  NButton,
+  NRadioGroup,
+  NRadio,
+  NSpace,
+  NForm,
+  NFormItem,
+  NInput,
+  NModal,
+  useMessage
+} from 'naive-ui'
 import { AddSharp } from '@vicons/ionicons5'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { IpcChannel } from '@shared/ipc'
+import { globalState } from '@renderer/store/index'
 
 const message = useMessage()
 
 const state = reactive({
   modalShow: false,
-  accounts: [] as XhsAccount[]
+  accounts: [] as XhsAccount[],
+  currentUserId: globalState.currentAccount?.user_id,
+  currentAccount: null as XhsAccount | null
 })
 
 const formRef = ref<FormInst | null>(null)
@@ -64,7 +78,7 @@ const handleValidateClick = () => {
         const action = form.value.accountId ? IpcChannel.UpdateAccount : IpcChannel.AddAccount
         await window.electron.ipcRenderer.invoke(action, {
           ...data,
-          user_id: form.value.accountId || '',
+          user_id: data.user_id || form.value.accountId || '',
           baseCookie: form.value.baseCookie,
           creatorCookie: form.value.creatorCookie
         })
@@ -106,6 +120,13 @@ watch(
   }
 )
 
+const checkoutAccount = (account: XhsAccount) => {
+  // state.currentAccount = account
+  globalState.currentAccount = account
+  console.log('set: ', account)
+  state.currentUserId = account.user_id
+}
+
 const getAccounts = async () => {
   return await window.electron.ipcRenderer.invoke(IpcChannel.GetAccountList)
 }
@@ -125,34 +146,32 @@ onMounted(async () => {
       />
       <div class="account-id">账号ID：819221812</div>
     </div>
-    <div class="xhs-list">
-      <div class="xhs-item active">
-        <img
-          class="xhs-avatar"
-          src="https://sns-avatar-qc.xhscdn.com/avatar/61727ede1f4003dc393c64fa.jpg?imageView2/2/w/120/format/jpg"
-        />
-        <div class="xhs-info">
-          <div class="info-nickname">爱做饭的程序员</div>
-          <div class="info-status">
-            <!-- <div class="normal-status">账号正常</div> -->
-            <div class="status unnormal-status">已离线</div>
+    <n-radio-group style="width: 100%" v-model:value="state.currentUserId">
+      <div class="xhs-list">
+        <div
+          v-for="account in state.accounts"
+          :key="account.user_id"
+          class="xhs-item"
+          :class="{ active: globalState.currentAccount?.user_id === account.user_id }"
+          @click.stop="checkoutAccount(account)"
+        >
+          <n-radio style="margin-right: 10px" :value="account.user_id"></n-radio>
+          <img class="xhs-avatar" :src="account.images" />
+          <div class="xhs-info">
+            <div class="info-nickname">{{ account.nickname }}</div>
+            <div class="info-status">
+              <div class="status normal-status">账号正常</div>
+              <div class="status unnormal-status">已离线</div>
+            </div>
+          </div>
+          <div class="btn-operate">
+            <NButton text type="primary" size="small" @click="showEditDialog(account)"
+              >编辑</NButton
+            >
           </div>
         </div>
       </div>
-      <div v-for="account in state.accounts" :key="account.user_id" class="xhs-item">
-        <img class="xhs-avatar" :src="account.images" />
-        <div class="xhs-info">
-          <div class="info-nickname">{{ account.nickname }}</div>
-          <div class="info-status">
-            <div class="status normal-status">账号正常</div>
-            <div class="status unnormal-status">已离线</div>
-          </div>
-        </div>
-        <div class="btn-operate">
-          <NButton text type="primary" size="small" @click="showEditDialog(account)">编辑</NButton>
-        </div>
-      </div>
-    </div>
+    </n-radio-group>
 
     <div class="operate">
       <NButton type="primary" @click="showNewDialog">
@@ -239,6 +258,7 @@ onMounted(async () => {
 }
 
 .xhs-item {
+  position: relative;
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -246,14 +266,22 @@ onMounted(async () => {
   padding: 10px;
   border-bottom: 1px solid #f2f2f2;
   padding-bottom: 10px;
+  transition: all 0.3s;
+  user-select: none;
 
   &:hover {
+    background-color: #f1f1f1;
+
     .btn-operate {
       display: block;
     }
   }
 
   .btn-operate {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     display: none;
   }
 
@@ -263,7 +291,7 @@ onMounted(async () => {
   }
 
   &.active {
-    background-color: #ddd;
+    background-color: #e5e5e5;
   }
 
   .xhs-avatar {

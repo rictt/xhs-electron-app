@@ -1,6 +1,6 @@
 import { IpcMainEvent, ipcMain } from 'electron'
 import { IpcChannel } from '@shared/ipc'
-import { createXhsInstance } from '../puppeteer'
+import { getXhsInstance } from '../puppeteer'
 import { systemDb } from '../lowdb'
 
 export const listeners = {
@@ -11,7 +11,7 @@ export const listeners = {
   [IpcChannel.ValidXhsCookie]: async (_event: IpcMainEvent, args: any) => {
     console.log(args)
     const { baseCookie, creatorCookie } = args
-    const xhs = await createXhsInstance(baseCookie, creatorCookie)
+    const xhs = await getXhsInstance({ baseCookie, creatorCookie })
     try {
       const data = await xhs.validCookie()
       console.log('xhs: ', data)
@@ -20,7 +20,7 @@ export const listeners = {
       console.log('xhs failed: ', error)
       return Promise.reject(error)
     } finally {
-      await xhs.page.close()
+      xhs.page.close()
     }
   },
 
@@ -54,6 +54,36 @@ export const listeners = {
       return true
     } catch (error) {
       return false
+    }
+  },
+
+  [IpcChannel.GetNoteList]: async (_event: IpcMainEvent, account: XhsAccount, sync?: boolean) => {
+    if (sync) {
+      try {
+        console.log('account: ', account)
+        const xhs = await getXhsInstance({
+          baseCookie: account.baseCookie,
+          creatorCookie: account.creatorCookie,
+          user_id: account.user_id
+        })
+        // return await xhs.getNoteCommentsByNoteId(account.user_id)
+        const newNotes = await xhs.getOwnNotes()
+        await systemDb.db.read()
+        const newNoteIds = newNotes.map((e) => e.note_id)
+        const oldNotes = systemDb.data.notes.filter((e) => !newNoteIds.includes(e.note_id))
+        const result = [...oldNotes, ...newNotes]
+        systemDb.data.notes = result
+        console.log('write notes: ', systemDb.data.notes)
+        await systemDb.db.write()
+        // await systemDb.addNote
+        return result
+      } catch (error) {
+        console.log('GetNoteList error: ', error)
+        return []
+      }
+    } else {
+      await systemDb.db.read()
+      return systemDb.data.notes.filter((e) => e.user_id && e.user_id === account.user_id)
     }
   }
 }

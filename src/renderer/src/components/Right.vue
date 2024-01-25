@@ -1,7 +1,8 @@
 <script setup>
-import { NCard, NTabs, NTabPane } from 'naive-ui'
+import { NCard, NResult, NTabs, NTabPane } from 'naive-ui'
 import { reactive } from 'vue'
 import Notes from './Notes.vue'
+import { globalState } from '@renderer/store'
 
 const state = reactive({
   tabs: [
@@ -19,17 +20,34 @@ const components = {
 
 <template>
   <div class="right-container">
-    <n-card style="margin-bottom: 16px">
+    <n-card class="right-card-wrapper" style="margin-bottom: 16px; height: 100%">
       <n-tabs v-model:value="state.currentTab" type="card" animated>
         <n-tab-pane
-          v-for="item in state.tabs"
+          v-for="(item, index) in state.tabs"
           :key="item.name"
           :name="item.name"
           :tab="item.label"
-          display-directive="show"
+          display-directive="if"
         >
-          <component :is="components[state.currentTab]" />
-          <div v-if="!components[state.currentTab]">{{ item.label }}</div>
+          <n-result
+            v-if="!globalState.currentAccount"
+            style="
+              min-height: 400px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+            "
+            status="418"
+            title="选择左边账号"
+            description="元！启动！！"
+          ></n-result>
+          <component
+            :is="components[state.currentTab]"
+            v-show="components[state.currentTab] && globalState.currentAccount"
+            :index="index"
+          />
+          <div v-if="globalState.currentAccount && !components[state.currentTab]">开发中...</div>
         </n-tab-pane>
       </n-tabs>
     </n-card>
@@ -39,5 +57,11 @@ const components = {
 <style lang="less" scoped>
 .right-container {
   flex: 1;
+}
+
+.right-card-wrapper {
+  :deep(.n-card__content) {
+    max-height: 80vh;
+  }
 }
 </style>

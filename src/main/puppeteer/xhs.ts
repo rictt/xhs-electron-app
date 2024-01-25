@@ -37,7 +37,7 @@ export class Xhs extends EventEmitter {
   page: Page
   rules: Rule[] = []
   userInfo: UserInfo
-  user_id: string = '61de601a0000000010009ee9'
+  user_id: string = ''
   max_comments_count: number = 100
   loading: boolean = false
   commentMap: Map<string, Comment[]> = new Map()
@@ -45,8 +45,9 @@ export class Xhs extends EventEmitter {
   status: Status = 'idle'
   timer: string | number | NodeJS.Timeout
 
-  constructor(page: Page) {
+  constructor(page: Page, user_id?: string) {
     super()
+    this.user_id = user_id
     this.page = page
     this.addRule('v1/you/mentions', this.onMentionsResponse.bind(this))
     this.addRule('sns/web/unread_count', this.onUnReadCountResponse.bind(this))
@@ -82,7 +83,13 @@ export class Xhs extends EventEmitter {
             const payload = extractBodyByPostData(request.postData())
             rule.handler(json.data, query, payload)
           } else {
-            console.log('request failed, url is: ', url + ' response was: ', json)
+            const msg = (json?.msg ?? '') as string
+            const isExpired = msg.indexOf('过期') !== -1 || msg.indexOf('无登录') !== -1
+            if (isExpired) {
+              console.log('登录信息已过期')
+            } else {
+              console.log('request failed, url is: ', url + ' response was: ', json)
+            }
           }
         }
       }
@@ -100,12 +107,11 @@ export class Xhs extends EventEmitter {
   }
 
   async validCookie() {
-    await this.page.goto('https://www.xiaohongshu.com/explore')
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       let timer = setTimeout(() => {
         reject('timeout')
       }, 1000 * 60)
-      this.once('meResponse', (data) => {
+      this.on('meResponse', (data) => {
         clearTimeout(timer)
         timer = null
         console.log('me response: ', data)
@@ -115,6 +121,7 @@ export class Xhs extends EventEmitter {
           resolve(data)
         }
       })
+      await this.page.goto('https://www.xiaohongshu.com/explore')
     })
   }
 
@@ -175,12 +182,14 @@ export class Xhs extends EventEmitter {
     })
   }
 
-  async getOwnNotes() {
+  async getOwnNotes(): Promise<NoteDataItem[]> {
     if (!this.user_id) {
-      return console.log('user login failed')
+      console.log('user login failed')
+      return []
     }
     if (this.loading) {
-      return console.log('loading...')
+      console.log('loading...')
+      return []
     }
     this.loading = true
     await this.page.goto(`https://www.xiaohongshu.com/user/profile/${this.user_id}`)
@@ -190,25 +199,34 @@ export class Xhs extends EventEmitter {
       this.page.waitForSelector('.cover')
     ])
     await this.timeout()
-    const list = await this.page.$$eval('.note-item', (eles) => {
-      return eles.map((e) => {
-        const noteHref = e.querySelector('a')?.href
-        const title = (e.querySelector('.footer span') as HTMLElement)?.innerText
-        const count = (e.querySelector('.count') as HTMLElement)?.innerText
-        const cover =
-          (e.querySelector('.cover') as HTMLElement)?.style?.backgroundImage?.slice(5, -2) ?? ''
+    const list = await this.page.$$eval(
+      '.note-item',
+      (eles, user_id) => {
+        return eles.map((e) => {
+          const noteHref = e.querySelector('a')?.href
+          const title = (e.querySelector('.footer span') as HTMLElement)?.innerText
+          const count = (e.querySelector('.count') as HTMLElement)?.innerText
+          const cover =
+            (e.querySelector('.cover') as HTMLElement)?.style?.backgroundImage?.slice(5, -2) ?? ''
+          const parts = noteHref?.split?.('/') || []
+          const noteId = parts[parts.length - 1]
 
-        return {
-          noteHref,
-          title,
-          count,
-          cover
-        }
-      })
-    })
-
+          return {
+            note_href: noteHref,
+            title,
+            count,
+            cover,
+            user_id: user_id,
+            note_id: noteId
+          }
+        })
+      },
+      this.user_id
+    )
     const p = path.join(__dirname, './notes.json')
     fs.writeFileSync(p, JSON.stringify(list, null, 2))
+
+    return list
   }
 
   async getNoteCommentsByNoteId(id: string): Promise<Comment[]> {

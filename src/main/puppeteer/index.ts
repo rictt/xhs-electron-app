@@ -1,11 +1,25 @@
-import { Browser, launch } from 'puppeteer'
+import { Browser, Page, launch } from 'puppeteer'
 import { preloadDetection, getCookies } from '../utils'
 import * as config from '../config'
 import { Xhs } from './xhs'
 
 let __browser: Browser
+const __xhs: Xhs[] = []
 
-export async function createXhsInstance(baseCookie: string, creator_cookie: string) {
+type GetInstanceParams = {
+  baseCookie: string
+  creatorCookie: string
+  user_id?: string
+}
+export async function getXhsInstance(params: GetInstanceParams) {
+  const { baseCookie, creatorCookie, user_id } = params
+  if (user_id) {
+    const instance = __xhs.find((e) => e.user_id === user_id)
+    if (instance) {
+      return instance
+    }
+  }
+
   if (!__browser) {
     __browser = await launch({
       defaultViewport: null,
@@ -18,13 +32,13 @@ export async function createXhsInstance(baseCookie: string, creator_cookie: stri
   })
 
   const page = await browser.newPage()
-  const xhs = new Xhs(page)
+  const xhs = new Xhs(page, user_id)
   await page.setViewport({
     width: 1920,
     height: 1080
   })
 
-  const cookies = getCookies(baseCookie, creator_cookie)
+  const cookies = getCookies(baseCookie, creatorCookie)
   page.on('response', (response) => xhs.onResponse(response))
   await preloadDetection(page)
   await page.setUserAgent(config.headers.userAgent)

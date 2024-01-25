@@ -3,36 +3,10 @@ import { JSONFileSync } from 'lowdb/node'
 import { app } from 'electron'
 import { join } from 'path'
 
-type NoteStatus = 'monitor' | 'idle'
-
-type NoteItem = {
-  id: string
-  noteHref: string
-  title: string
-  count: string
-  cover: string
-  status?: NoteStatus
-}
-
 type Data = {
   // accounts: AccountItem[]
   accounts: XhsAccount[]
-  notes: NoteItem[]
-}
-
-export async function initDB() {
-  const defaultData = {
-    accounts: [],
-    notes: []
-  }
-
-  const filePath = join(app.getPath('userData'), 'db.json')
-  console.log('filePath: ', filePath)
-  const adapter = new JSONFileSync<Data>(filePath)
-  const db = new LowSync(adapter, defaultData)
-
-  await db.read()
-  return db
+  notes: NoteDataItem[]
 }
 
 class SystemDB {
@@ -51,7 +25,22 @@ class SystemDB {
     this.db = db
   }
 
+  async clean() {
+    // this.data.accounts = []
+    this.data.notes = []
+    await this.db.write()
+  }
+
   async init() {
+    // const ids = []
+    // this.db.data.accounts = this.db.data.accounts.filter((e) => {
+    //   if (ids.includes(e.user_id)) {
+    //     return false
+    //   }
+    //   ids.push(e.user_id)
+    //   return true
+    // })
+    // await this.db.write()
     await this.db.read()
   }
 
@@ -65,19 +54,19 @@ class SystemDB {
     await this.db.write()
   }
 
-  async addNote(note: NoteItem) {
+  async addNote(note: NoteDataItem) {
     note.status = note.status || 'idle'
     this.db.data.notes.push(note)
     await this.db.write()
   }
 
   async removeNote(noteId: string) {
-    this.db.data.notes = this.db.data.notes.filter((e) => e.id !== noteId)
+    this.db.data.notes = this.db.data.notes.filter((e) => e.note_id !== noteId)
     await this.db.write()
   }
 
   async updateNoteStatus(id: string, status: NoteStatus) {
-    const target = this.db.data.notes.find((e) => e.id === id)
+    const target = this.db.data.notes.find((e) => e.note_id === id)
     if (target) {
       target.status = status
     }
