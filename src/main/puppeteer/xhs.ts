@@ -51,7 +51,7 @@ export class Xhs extends EventEmitter {
     this.user_id = user_id
     this.page = page
     this.addRule('v1/you/mentions', this.onMentionsResponse.bind(this))
-    this.addRule('sns/web/unread_count', this.onUnReadCountResponse.bind(this))
+    // this.addRule('sns/web/unread_count', this.onUnReadCountResponse.bind(this))
     this.addRule('sns/web/v2/user/me', this.onMeResponse.bind(this))
     this.addRule('sns/web/v2/comment/page?note_id', this.onNoteCommentsResponse.bind(this))
     this.addRule('sns/web/v1/comment/post', this.onCommentPostResponse.bind(this), 'POST')
@@ -223,16 +223,15 @@ export class Xhs extends EventEmitter {
             count,
             cover,
             user_id: user_id,
-            note_id: noteId
+            note_id: noteId,
+            status: 'idle'
           }
         })
       },
       this.user_id
     )
-    const p = path.join(__dirname, './notes.json')
-    fs.writeFileSync(p, JSON.stringify(list, null, 2))
 
-    return list
+    return list as NoteDataItem[]
   }
 
   async getNoteCommentsByNoteId(id: string): Promise<Comment[]> {
@@ -382,7 +381,7 @@ export class Xhs extends EventEmitter {
 
       const name = 'reply:' + comment_id
       const handler = (data) => {
-        console.log(`回复 ${comment_id} 成功:  `, ', 回复文本为：' + reply_text)
+        console.log(`回复 ${comment_id} 成功, `, ' 回复文本为：' + reply_text)
         this.off(name, handler)
         resolve(data)
       }

@@ -68,15 +68,16 @@ export const listeners = {
         })
         // return await xhs.getNoteCommentsByNoteId(account.user_id)
         const newNotes = await xhs.getOwnNotes()
+        console.log('new notes: ', newNotes.length)
         await systemDb.db.read()
         const newNoteIds = newNotes.map((e) => e.note_id)
         const oldNotes = systemDb.data.notes.filter((e) => !newNoteIds.includes(e.note_id))
         const result = [...oldNotes, ...newNotes]
         systemDb.data.notes = result
-        console.log('write notes: ', systemDb.data.notes)
+        const userOwn = result.filter((e) => e.user_id === account.user_id)
+        console.log('write notes: ', systemDb.data.notes.length)
         await systemDb.db.write()
-        // await systemDb.addNote
-        return result
+        return userOwn
       } catch (error) {
         console.log('GetNoteList error: ', error)
         return []

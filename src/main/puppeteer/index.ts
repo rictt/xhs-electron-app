@@ -31,7 +31,9 @@ export async function getXhsInstance(params: GetInstanceParams) {
     console.log('[browser disconnected]')
   })
 
-  const page = await browser.newPage()
+  const context = await browser.createIncognitoBrowserContext()
+  // const page = await browser.newPage()
+  const page = await context.newPage()
   const xhs = new Xhs(page, user_id)
   await page.setViewport({
     width: 1920,

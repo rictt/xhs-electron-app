@@ -95,9 +95,10 @@ const createColumns = () => {
               <NButton type="primary" onClick={() => monitorNote(row)}>
                 自动回复
               </NButton>
-            ) : (
+            ) : null}
+            {row.status === 'monitor' ? (
               <NButton onClick={() => cancelMonitorNote(row)}>取消自动回复</NButton>
-            )}
+            ) : null}
           </>
         )
       }
