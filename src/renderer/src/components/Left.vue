@@ -121,9 +121,7 @@ watch(
 )
 
 const checkoutAccount = (account: XhsAccount) => {
-  // state.currentAccount = account
   globalState.currentAccount = account
-  console.log('set: ', account)
   state.currentUserId = account.user_id
 }
 
@@ -133,8 +131,8 @@ const getAccounts = async () => {
 
 onMounted(async () => {
   const list = await getAccounts()
-  console.log('accounts: ', list)
   state.accounts = list
+  globalState.accountList = list
 })
 </script>
 <template>
@@ -146,7 +144,7 @@ onMounted(async () => {
       />
       <div class="account-id">账号ID：819221812</div>
     </div>
-    <n-radio-group style="width: 100%" v-model:value="state.currentUserId">
+    <n-radio-group v-model:value="state.currentUserId" style="width: 100%">
       <div class="xhs-list">
         <div
           v-for="account in state.accounts"

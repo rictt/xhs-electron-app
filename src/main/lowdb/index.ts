@@ -7,6 +7,7 @@ type Data = {
   // accounts: AccountItem[]
   accounts: XhsAccount[]
   notes: NoteDataItem[]
+  comments: CommentDataItem[]
 }
 
 class SystemDB {
@@ -17,7 +18,8 @@ class SystemDB {
   constructor() {
     const defaultData: Data = {
       accounts: [],
-      notes: []
+      notes: [],
+      comments: []
     }
     const filePath = join(app.getPath('userData'), 'system' + '.json')
     const adapter = new JSONFileSync<Data>(filePath)
@@ -69,6 +71,14 @@ class SystemDB {
     const target = this.db.data.notes.find((e) => e.note_id === id)
     if (target) {
       target.status = status
+    }
+    await this.db.write()
+  }
+
+  async updateNote(id: string, key: string, value: any) {
+    const target = this.db.data.notes.find((e) => e.note_id === id)
+    if (target) {
+      target[key] = value
     }
     await this.db.write()
   }

@@ -11,7 +11,13 @@ export const enum IpcChannel {
 
   GetAccountList = 'GetAccountList',
 
-  GetNoteList = 'GetNoteList'
+  GetNoteList = 'GetNoteList',
+
+  UpdateNote = 'UpdateNote',
+
+  StartNoteMonitor = 'StartNoteMonitor',
+
+  CancelNoteMonitor = 'CancelNoteMonitor'
 }
 
 export type IpcMainEventList = {

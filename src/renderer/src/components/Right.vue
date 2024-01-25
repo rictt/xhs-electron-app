@@ -1,8 +1,9 @@
 <script setup>
 import { NCard, NResult, NTabs, NTabPane } from 'naive-ui'
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import Notes from './Notes.vue'
 import { globalState } from '@renderer/store'
+import AccountPanel from './AccountPanel.vue'
 
 const state = reactive({
   tabs: [
@@ -21,35 +22,13 @@ const components = {
 <template>
   <div class="right-container">
     <n-card class="right-card-wrapper" style="margin-bottom: 16px; height: 100%">
-      <n-tabs v-model:value="state.currentTab" type="card" animated>
-        <n-tab-pane
-          v-for="(item, index) in state.tabs"
-          :key="item.name"
-          :name="item.name"
-          :tab="item.label"
-          display-directive="if"
-        >
-          <n-result
-            v-if="!globalState.currentAccount"
-            style="
-              min-height: 400px;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-            "
-            status="418"
-            title="选择左边账号"
-            description="元！启动！！"
-          ></n-result>
-          <component
-            :is="components[state.currentTab]"
-            v-show="components[state.currentTab] && globalState.currentAccount"
-            :index="index"
-          />
-          <div v-if="globalState.currentAccount && !components[state.currentTab]">开发中...</div>
-        </n-tab-pane>
-      </n-tabs>
+      <KeepAlive v-for="account in globalState.accountList" :key="account.user_id">
+        <AccountPanel
+          v-show="globalState.currentAccount?.user_id === account.user_id"
+          :key="account.user_id"
+          :account="account"
+        />
+      </KeepAlive>
     </n-card>
   </div>
 </template>

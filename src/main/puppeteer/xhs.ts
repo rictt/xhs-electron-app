@@ -3,6 +3,7 @@ import { EventEmitter } from 'events'
 import fs from 'fs'
 import path from 'path'
 import { extractQueryByUrl, extractBodyByPostData } from '../utils'
+import { systemDb } from '@main/lowdb'
 
 const __dirname = path.resolve()
 
@@ -130,8 +131,6 @@ export class Xhs extends EventEmitter {
     if (!data.guest) {
       this.userInfo = data
       this.user_id = data.user_id
-      const p = path.join(__dirname, './meData.json')
-      fs.writeFileSync(p, JSON.stringify(data, null, 2))
     }
     this.emit('meResponse', data)
     await this.timeout()
@@ -145,8 +144,15 @@ export class Xhs extends EventEmitter {
     }
 
     const list = this.commentMap.get(note_id) || []
-    list.push(...comments)
-    this.commentMap.set(note_id, list)
+    const ids = list.map((e) => e.id)
+    const newList = [...list]
+    ;(comments as Comment[]).forEach((com) => {
+      if (!ids.includes(com.id)) {
+        ids.push(com.id)
+        newList.push(com)
+      }
+    })
+    this.commentMap.set(note_id, newList)
     this.has_more_comments = has_more
 
     console.log('on onNoteCommentsResponse, has more: ', has_more, ' list len: ', list.length)
@@ -267,14 +273,16 @@ export class Xhs extends EventEmitter {
       console.log('onCommentPostResponse error: ', data, query, payload)
       return
     }
-    const list = JSON.parse(fs.readFileSync('./replyRecord.json', 'utf-8'))
+
+    await systemDb.db.read()
+    const list = systemDb.data.comments || []
     list.push({
       note_id,
       target_comment_id,
       content
     })
-
-    fs.writeFileSync('./replyRecord.json', JSON.stringify(list, null, 2))
+    systemDb.data.comments = [...list]
+    await systemDb.db.write()
 
     const name = 'reply:' + target_comment_id
     console.log('onCommentPostResponse: ', name)
@@ -318,14 +326,17 @@ export class Xhs extends EventEmitter {
           this.timer = setTimeout(async () => {
             console.log('刷新页面开启')
             // 由于是刷新页面，需要重置index，否则一直会找不到新的评论
+            start_index = 1
             await this.page.goto(`https://www.xiaohongshu.com/explore/${note_id}`)
             await handler()
             console.log('刷新页面成功')
-          }, 1000 * 120)
+            // }, 1000 * 120)
+          }, 1000 * 30)
           console.log('等待重新刷新页面')
         }
       } else {
-        const exist_list = JSON.parse(fs.readFileSync('./replyRecord.json', 'utf-8')) as any[]
+        await systemDb.db.read()
+        const exist_list = systemDb.data.comments || []
         const comment_id = await this.page.$eval(selector, (el: HTMLElement) => {
           return el.children[0].getAttribute('id').split('-')[1]
         })
@@ -336,7 +347,7 @@ export class Xhs extends EventEmitter {
           return
         }
 
-        await this.replyTo(start_index, text + start_index)
+        await this.replyTo(start_index, text)
         await this.timeout(1000)
         start_index++
         await handler()
@@ -356,15 +367,12 @@ export class Xhs extends EventEmitter {
   }
 
   async replyTo(index: number, reply_text: string) {
-    console.log('reply to text: ', reply_text)
     return new Promise(async (resolve) => {
       const box_selector = `.parent-comment:nth-child(${index})`
       const selector = `${box_selector} .reply`
       const comment_id = await this.page.$eval(box_selector, (el: HTMLElement) => {
         return el.children[0].getAttribute('id').split('-')[1]
       })
-
-      console.log('comment_id: ', comment_id)
 
       if (!comment_id) {
         console.log('comment_id not found')
@@ -374,7 +382,7 @@ export class Xhs extends EventEmitter {
 
       const name = 'reply:' + comment_id
       const handler = (data) => {
-        console.log(`回复${comment_id}成功:  `, reply_text)
+        console.log(`回复 ${comment_id} 成功:  `, ', 回复文本为：' + reply_text)
         this.off(name, handler)
         resolve(data)
       }
@@ -385,7 +393,6 @@ export class Xhs extends EventEmitter {
       })
       await this.page.waitForSelector('#content-textarea')
 
-      console.log('type text: ', reply_text)
       await this.page.type('#content-textarea', reply_text, {
         delay: 100
       })

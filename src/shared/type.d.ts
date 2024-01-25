@@ -24,4 +24,11 @@ declare interface NoteDataItem {
   count: string
   cover: string
   status?: NoteStatus
+  reply_text?: string
+}
+
+declare interface CommentDataItem {
+  note_id: string
+  target_comment_id: string
+  content: string
 }

@@ -85,7 +85,41 @@ export const listeners = {
       await systemDb.db.read()
       return systemDb.data.notes.filter((e) => e.user_id && e.user_id === account.user_id)
     }
-  }
+  },
+
+  [IpcChannel.UpdateNote]: async (
+    _event: IpcMainEvent,
+    note_id: string,
+    key: string,
+    value: any
+  ) => {
+    await systemDb.updateNote(note_id, key, value)
+    return true
+  },
+
+  [IpcChannel.StartNoteMonitor]: async (
+    _event: IpcMainEvent,
+    account: XhsAccount,
+    note_id: string,
+    reply_text: string
+  ) => {
+    const xhs = await getXhsInstance({
+      baseCookie: account.baseCookie,
+      creatorCookie: account.creatorCookie
+    })
+    xhs.monitorAutoReplyComment(note_id, reply_text)
+    await systemDb.db.read()
+    systemDb.data.notes.forEach((note) => {
+      if (note.note_id === note_id) {
+        note.status = 'monitor'
+      }
+    })
+    await systemDb.db.write()
+    console.log('开启监听')
+    return true
+  },
+
+  [IpcChannel.CancelNoteMonitor]: async (_event: IpcMainEvent, note_id: string) => {}
 }
 
 export const registerIpcMainEvent = () => {

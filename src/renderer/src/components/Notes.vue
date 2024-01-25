@@ -1,15 +1,14 @@
 <script setup lang="tsx">
-import { NButton, NDataTable, NSpin } from 'naive-ui'
-import { onMounted, reactive, toRaw, watch } from 'vue'
+import { NButton, NIcon, NDataTable, NInput, NSpin, useMessage } from 'naive-ui'
+import { onMounted, reactive, toRaw, inject } from 'vue'
 import { RefreshSharp } from '@vicons/ionicons5'
+import { Edit } from '@vicons/carbon'
 import { IpcChannel } from '@shared/ipc'
 import { globalState } from '@renderer/store'
 
-const props = defineProps({
-  index: {
-    type: Number
-  }
-})
+const account = inject<XhsAccount>('account')
+
+const message = useMessage()
 
 const createColumns = () => {
   return [
@@ -38,13 +37,51 @@ const createColumns = () => {
     },
     {
       title: '回复文本',
-      width: 100,
+      width: 140,
       ellipsis: {
         tooltip: true
       },
-      key: 'replayText',
-      render: () => {
-        return '私[doge]回复文本'
+      key: 'reply_text',
+      render: (row: NoteDataItem, index) => {
+        const setEditReplyIndex = () => {
+          state.editReplyIndex = index
+        }
+        if (state.editReplyIndex === index) {
+          const onBlur = () => {
+            window.electron.ipcRenderer.invoke(
+              IpcChannel.UpdateNote,
+              row.note_id,
+              'reply_text',
+              row.reply_text
+            )
+            state.editReplyIndex = -1
+          }
+          return (
+            <NInput
+              value={row.reply_text}
+              placeholder="不能为空"
+              onInput={(e) => {
+                row.reply_text = e
+              }}
+              onBlur={onBlur}
+            />
+          )
+        }
+        if (row.reply_text) {
+          return (
+            <div style="display: flex; align-items: center;">
+              <span>{row.reply_text}</span>
+              <NIcon style="cursor: pointer; margin-left: 4px;" onClick={setEditReplyIndex}>
+                <Edit />
+              </NIcon>
+            </div>
+          )
+        }
+        return (
+          <NButton text type="primary" onClick={setEditReplyIndex}>
+            设置
+          </NButton>
+        )
       }
     },
     {
@@ -55,11 +92,11 @@ const createColumns = () => {
         return (
           <>
             {row.status === 'idle' ? (
-              <NButton type="primary" onClick={() => monitorNote(row.note_id)}>
+              <NButton type="primary" onClick={() => monitorNote(row)}>
                 自动回复
               </NButton>
             ) : (
-              <NButton onClick={() => cancelMonitorNote(row.note_id)}>取消自动回复</NButton>
+              <NButton onClick={() => cancelMonitorNote(row)}>取消自动回复</NButton>
             )}
           </>
         )
@@ -70,20 +107,12 @@ const createColumns = () => {
 
 const state = reactive({
   loading: false,
-  tableData: [
-    {
-      note_href: 'https://www.xiaohongshu.com/explore/657055250000000009026490',
-      title: '嘎嘎好吃好做的家常菜！',
-      count: '2',
-      status: 'idle',
-      cover:
-        'https://sns-webpic-qc.xhscdn.com/202401231203/61a84fc783729605b383da0fef9e8af5/1040g2sg30s4tinanis6g5oeuc0d417n9h94l8j8!nc_n_webp_mw_1'
-    }
-  ] as NoteDataItem[],
+  tableData: [] as NoteDataItem[],
   tableColumns: createColumns(),
   pagination: {
     pageSize: 10
-  }
+  },
+  editReplyIndex: -1
 })
 
 const goSync = async () => {
@@ -110,25 +139,31 @@ const fetchAccountNotes = async (account: XhsAccount, sync: boolean = false) => 
   }
 }
 
-const monitorNote = async (note_id: string) => {
-  console.log('monitor ', note_id)
-}
-
-const cancelMonitorNote = async (note_id: string) => {
-  console.log('cancel monitor ', note_id)
-}
-
-watch(
-  () => globalState.currentAccount,
-  (value) => {
-    if (value && value.user_id) {
-      fetchAccountNotes(value)
-    }
-  },
-  {
-    immediate: true
+const monitorNote = async (row: NoteDataItem) => {
+  const { reply_text, note_id } = row
+  if (!note_id || !reply_text) {
+    message.error('笔记Id、回复文本不能为空')
+    return
   }
-)
+  console.log('monitor ', note_id)
+  window.electron.ipcRenderer.invoke(
+    IpcChannel.StartNoteMonitor,
+    toRaw(account),
+    note_id,
+    reply_text
+  )
+  row.status = 'monitor'
+}
+
+const cancelMonitorNote = async (row: NoteDataItem) => {
+  console.log('cancel monitor ', row)
+}
+
+onMounted(() => {
+  if (account && account.user_id) {
+    fetchAccountNotes(account)
+  }
+})
 </script>
 
 <template>
