@@ -1,4 +1,4 @@
-<script setup lang="less">
+<script setup>
 </script>
 
 <template>

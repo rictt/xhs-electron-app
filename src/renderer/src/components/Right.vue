@@ -20,7 +20,7 @@ const components = {
 </script>
 
 <template>
-  <div class="right-container">
+  <div id="right-container" class="right-container">
     <n-card class="right-card-wrapper" style="margin-bottom: 16px; height: 100%">
       <KeepAlive v-for="account in globalState.accountList" :key="account.user_id">
         <AccountPanel

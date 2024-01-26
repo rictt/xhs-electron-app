@@ -11,7 +11,7 @@ import {
   NModal,
   useMessage
 } from 'naive-ui'
-import { AddSharp } from '@vicons/ionicons5'
+import { AddSharp, PersonAddOutline } from '@vicons/ionicons5'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { IpcChannel } from '@shared/ipc'
 import { globalState } from '@renderer/store/index'
@@ -22,7 +22,8 @@ const state = reactive({
   modalShow: false,
   accounts: [] as XhsAccount[],
   currentUserId: globalState.currentAccount?.user_id,
-  currentAccount: null as XhsAccount | null
+  currentAccount: null as XhsAccount | null,
+  drawerVisible: true
 })
 
 const formRef = ref<FormInst | null>(null)
@@ -172,11 +173,17 @@ onMounted(async () => {
     </n-radio-group>
 
     <div class="operate">
+      <NButton type="primary" dashed @click="showNewDialog">
+        <template #icon>
+          <PersonAddOutline />
+        </template>
+        添加新账号
+      </NButton>
       <NButton type="primary" @click="showNewDialog">
         <template #icon>
           <AddSharp />
         </template>
-        添加新账号
+        管理作品
       </NButton>
     </div>
 
@@ -348,5 +355,11 @@ onMounted(async () => {
   align-items: center;
   flex-direction: column;
   margin: 30px 0;
+  padding: 0 20px;
+  row-gap: 10px;
+
+  .n-button {
+    width: 100%;
+  }
 }
 </style>
