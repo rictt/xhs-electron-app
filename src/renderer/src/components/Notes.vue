@@ -164,9 +164,8 @@ const monitorNote = async (row: NoteDataItem) => {
 
 const cancelMonitorNote = async (row: NoteDataItem) => {
   if (!row.monitor_id) {
-    return
+    await window.electron.ipcRenderer.invoke(IpcChannel.CancelNoteMonitor, row.monitor_id)
   }
-  await window.electron.ipcRenderer.invoke(IpcChannel.CancelNoteMonitor, row.monitor_id)
   row.status = 'idle'
 }
 

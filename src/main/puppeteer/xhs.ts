@@ -458,4 +458,17 @@ export class Xhs extends EventEmitter {
     // await this.page.screenshot({ path: 'notice_4.png' })
     // console.log('发布中')
   }
+
+  async publicPicText() {
+    console.log('发布图文')
+    /**
+     * 预先设置
+     *  图片、标题、描述信息
+     *  发布设置
+     * 进一步
+     *  选择发布的账号
+     * 第三步
+     *  生成发布的内容预览，这里可对标题、描述细微修改
+     */
+  }
 }
