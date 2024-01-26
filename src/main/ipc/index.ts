@@ -1,6 +1,6 @@
 import { IpcMainEvent, ipcMain } from 'electron'
 import { IpcChannel } from '@shared/ipc'
-import { getXhsInstance } from '../puppeteer'
+import { getXhsInstance, xhsInstances } from '../puppeteer'
 import { systemDb } from '../lowdb'
 
 export const listeners = {
@@ -108,19 +108,26 @@ export const listeners = {
       baseCookie: account.baseCookie,
       creatorCookie: account.creatorCookie
     })
+    const monitorId = await xhs.createMonitorId(note_id)
     xhs.monitorAutoReplyComment(note_id, reply_text)
     await systemDb.db.read()
-    systemDb.data.notes.forEach((note) => {
-      if (note.note_id === note_id) {
-        note.status = 'monitor'
-      }
-    })
-    await systemDb.db.write()
+    await systemDb.updateNote(note_id, 'status', 'monitor')
     console.log('开启监听')
-    return true
+    return monitorId
   },
 
-  [IpcChannel.CancelNoteMonitor]: async (_event: IpcMainEvent, note_id: string) => {}
+  [IpcChannel.CancelNoteMonitor]: async (
+    _event: IpcMainEvent,
+    monitor_id: string,
+    note_id: string
+  ) => {
+    const instance = xhsInstances.find((e) => e.monitor_id === monitor_id)
+    if (instance) {
+      instance.stopMonitor()
+    }
+    await systemDb.updateNote(note_id, 'status', 'idle')
+    return true
+  }
 }
 
 export const registerIpcMainEvent = () => {

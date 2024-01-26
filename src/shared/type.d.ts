@@ -25,6 +25,7 @@ declare interface NoteDataItem {
   cover: string
   status?: NoteStatus
   reply_text?: string
+  monitor_id?: string
 }
 
 declare interface CommentDataItem {

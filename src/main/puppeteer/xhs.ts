@@ -45,6 +45,7 @@ export class Xhs extends EventEmitter {
   has_more_comments: boolean = true
   status: Status = 'idle'
   timer: string | number | NodeJS.Timeout
+  monitor_id?: string
 
   constructor(page: Page, user_id?: string) {
     super()
@@ -298,6 +299,14 @@ export class Xhs extends EventEmitter {
       }
     })
     await this.timeout()
+  }
+
+  async createMonitorId(note_id: string) {
+    if (!this.monitor_id) {
+      console.log('call before create monitor id')
+      this.monitor_id = `${note_id}_${Date.now()}`
+    }
+    return this.monitor_id
   }
 
   // 监听笔记下的评论

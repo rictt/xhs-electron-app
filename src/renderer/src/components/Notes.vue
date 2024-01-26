@@ -70,7 +70,9 @@ const createColumns = () => {
         if (row.reply_text) {
           return (
             <div style="display: flex; align-items: center;">
-              <span>{row.reply_text}</span>
+              <span style="flex: 1; text-overflow: ellipsis; overflow: hidden;">
+                {row.reply_text}
+              </span>
               <NIcon style="cursor: pointer; margin-left: 4px;" onClick={setEditReplyIndex}>
                 <Edit />
               </NIcon>
@@ -113,7 +115,8 @@ const state = reactive({
   pagination: {
     pageSize: 10
   },
-  editReplyIndex: -1
+  editReplyIndex: -1,
+  monitorId: ''
 })
 
 const goSync = async () => {
@@ -135,6 +138,7 @@ const fetchAccountNotes = async (account: XhsAccount, sync: boolean = false) => 
     state.tableData = notes
   } catch (error) {
     console.log(error)
+    message.error(error)
   } finally {
     state.loading = false
   }
@@ -147,17 +151,23 @@ const monitorNote = async (row: NoteDataItem) => {
     return
   }
   console.log('monitor ', note_id)
-  window.electron.ipcRenderer.invoke(
+  const monitorId = await window.electron.ipcRenderer.invoke(
     IpcChannel.StartNoteMonitor,
     toRaw(account),
     note_id,
     reply_text
   )
+  // state.monitorId = monitorId
+  row.monitor_id = monitorId
   row.status = 'monitor'
 }
 
 const cancelMonitorNote = async (row: NoteDataItem) => {
-  console.log('cancel monitor ', row)
+  if (!row.monitor_id) {
+    return
+  }
+  await window.electron.ipcRenderer.invoke(IpcChannel.CancelNoteMonitor, row.monitor_id)
+  row.status = 'idle'
 }
 
 onMounted(() => {

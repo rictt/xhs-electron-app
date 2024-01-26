@@ -4,21 +4,24 @@ import * as config from '../config'
 import { Xhs } from './xhs'
 
 let __browser: Browser
-const __xhs: Xhs[] = []
+// const __xhs: Xhs[] = []
+
+export const xhsInstances: Xhs[] = []
 
 type GetInstanceParams = {
   baseCookie: string
   creatorCookie: string
   user_id?: string
 }
+
 export async function getXhsInstance(params: GetInstanceParams) {
   const { baseCookie, creatorCookie, user_id } = params
-  if (user_id) {
-    const instance = __xhs.find((e) => e.user_id === user_id)
-    if (instance) {
-      return instance
-    }
-  }
+  // if (user_id) {
+  //   const instance = __xhs.find((e) => e.user_id === user_id)
+  //   if (instance) {
+  //     return instance
+  //   }
+  // }
 
   if (!__browser) {
     __browser = await launch({
@@ -35,6 +38,7 @@ export async function getXhsInstance(params: GetInstanceParams) {
   // const page = await browser.newPage()
   const page = await context.newPage()
   const xhs = new Xhs(page, user_id)
+  xhsInstances.push(xhs)
   await page.setViewport({
     width: 1920,
     height: 1080
