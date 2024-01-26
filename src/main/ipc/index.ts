@@ -127,6 +127,10 @@ export const listeners = {
     }
     await systemDb.updateNote(note_id, 'status', 'idle')
     return true
+  },
+
+  [IpcChannel.GetArticleList]: async (_event: IpcMainEvent) => {
+    return systemDb.data.articles
   }
 }
 

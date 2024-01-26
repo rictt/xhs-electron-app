@@ -17,7 +17,11 @@ export const enum IpcChannel {
 
   StartNoteMonitor = 'StartNoteMonitor',
 
-  CancelNoteMonitor = 'CancelNoteMonitor'
+  CancelNoteMonitor = 'CancelNoteMonitor',
+
+  GetArticleList = 'GetArticleList',
+
+  GetArticle = 'GetArticle'
 }
 
 export type IpcMainEventList = {

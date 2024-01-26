@@ -1,9 +1,23 @@
-<script setup>
+<script setup lang="ts">
+import { NTabs, NTabPane } from 'naive-ui'
+import PublishList from './PublishList.vue'
+import Publish from './Publish.vue'
+import { reactive } from 'vue';
+
+const state = reactive({
+  activeTab: 'new'
+})
 </script>
 
 <template>
-  <div></div>
+  <n-tabs v-model:value="state.activeTab" type="card" animated display-directive="show:lazy">
+    <n-tab-pane name="list" tab="作品列表">
+      <PublishList />
+    </n-tab-pane>
+    <n-tab-pane name="new" tab="发布新的">
+      <Publish />
+    </n-tab-pane>
+  </n-tabs>
 </template>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

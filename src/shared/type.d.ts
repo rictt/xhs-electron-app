@@ -33,3 +33,14 @@ declare interface CommentDataItem {
   target_comment_id: string
   content: string
 }
+
+declare interface ArticleDataItem {
+  user_id: string
+  title: string
+  desc: string
+
+  account?: XhsAccount
+  pictures?: string[]
+  channel?: string
+  create_time: number
+}

@@ -4,10 +4,10 @@ import { app } from 'electron'
 import { join } from 'path'
 
 type Data = {
-  // accounts: AccountItem[]
   accounts: XhsAccount[]
   notes: NoteDataItem[]
   comments: CommentDataItem[]
+  articles: ArticleDataItem[]
 }
 
 class SystemDB {
@@ -19,7 +19,8 @@ class SystemDB {
     const defaultData: Data = {
       accounts: [],
       notes: [],
-      comments: []
+      comments: [],
+      articles: []
     }
     const filePath = join(app.getPath('userData'), 'system' + '.json')
     const adapter = new JSONFileSync<Data>(filePath)

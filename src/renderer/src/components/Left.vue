@@ -123,11 +123,16 @@ watch(
 
 const checkoutAccount = (account: XhsAccount) => {
   globalState.currentAccount = account
+  globalState.activeComponetName = ''
   state.currentUserId = account.user_id
 }
 
 const getAccounts = async () => {
   return await window.electron.ipcRenderer.invoke(IpcChannel.GetAccountList)
+}
+
+const showManagePublish = () => {
+  globalState.activeComponetName = 'Publish'
 }
 
 onMounted(async () => {
@@ -179,7 +184,7 @@ onMounted(async () => {
         </template>
         添加新账号
       </NButton>
-      <NButton type="primary" @click="showNewDialog">
+      <NButton type="primary" @click="showManagePublish">
         <template #icon>
           <AddSharp />
         </template>
