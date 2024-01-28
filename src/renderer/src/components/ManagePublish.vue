@@ -7,15 +7,19 @@ import { reactive } from 'vue';
 const state = reactive({
   activeTab: 'new'
 })
+
+const onChangeTab = (name: string) => {
+  state.activeTab = name
+}
 </script>
 
 <template>
   <n-tabs v-model:value="state.activeTab" type="card" animated display-directive="show:lazy">
     <n-tab-pane name="list" tab="作品列表">
-      <PublishList />
+      <PublishList @change-tab="onChangeTab" />
     </n-tab-pane>
     <n-tab-pane name="new" tab="发布新的">
-      <Publish />
+      <Publish @change-tab="onChangeTab" />
     </n-tab-pane>
   </n-tabs>
 </template>

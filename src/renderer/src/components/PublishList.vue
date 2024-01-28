@@ -1,14 +1,19 @@
-<script setup lang="ts">
+<script setup lang="tsx">
 import { NButton, NDataTable, NSpin, DataTableColumn } from 'naive-ui'
 import { onMounted, reactive } from 'vue'
 import { RefreshSharp } from '@vicons/ionicons5'
 import { IpcChannel } from '@shared/ipc'
+import ImageList from './ImageList.vue'
+import { requireNativeImage, replaceNativeImageScheme } from '@renderer/utils'
 
 const createColumns = () => {
   return [
     {
       title: '标题',
-      key: 'title'
+      key: 'title',
+      ellipsis: {
+        tooltip: true
+      }
     },
     {
       title: '描述',
@@ -19,15 +24,26 @@ const createColumns = () => {
     },
     {
       title: '图片',
-      key: 'pictures'
+      key: 'pictures',
+      render: (row) => {
+        // return <ImageList value={row.pictures} />
+        return <ImageList model-value={row.pictures?.map((e) => requireNativeImage(e))} />
+      }
     },
     {
       title: '发布账号',
-      key: 'account'
+      key: 'account',
+      render: (row) => {
+        return row.account?.nickname
+      }
     },
     {
       title: '发布时间',
-      key: 'create_time'
+      key: 'create_time',
+      width: 180,
+      render: (row) => {
+        return new Date(row.create_time).toLocaleString()
+      }
     }
   ] as DataTableColumn[]
 }
@@ -49,7 +65,7 @@ const getList = async () => {
     state.loading = true
     const list = await window.electron.ipcRenderer.invoke(IpcChannel.GetArticleList)
     console.log('list: ', list)
-    state.tableData = list
+    state.tableData = list.sort((a, b) => b.create_time - a.create_time)
   } finally {
     state.loading = false
   }
@@ -64,7 +80,7 @@ onMounted(() => {
   <n-spin :show="state.loading">
     <div class="table-header">
       <div class="query-wrapper"></div>
-      <div class="btn-wrapper">
+      <div class="btn-wrapper" style="margin-bottom: 10px;">
         <n-button type="primary" size="small" @click="goSync">
           <template #icon>
             <RefreshSharp />
@@ -75,7 +91,7 @@ onMounted(() => {
     </div>
     <n-data-table
       bordered
-      max-height="420"
+      max-height="800"
       :columns="state.tableColumns"
       :data="state.tableData"
       :pagination="state.pagination"

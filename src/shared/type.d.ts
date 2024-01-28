@@ -44,3 +44,18 @@ declare interface ArticleDataItem {
   channel?: string
   create_time: number
 }
+
+declare interface CreateNewsForm {
+  accounts: XhsAccount[]
+  title: string
+  desc: string
+  pictures: string[]
+  isPublic: boolean
+}
+
+declare interface PublishOptions {
+  pictures: string[]
+  title: string
+  desc: string
+  isPublic?: boolean
+}

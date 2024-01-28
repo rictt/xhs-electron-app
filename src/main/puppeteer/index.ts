@@ -8,6 +8,14 @@ let __browser: Browser
 
 export const xhsInstances: Xhs[] = []
 
+export const removeXhsInstances = (instance: Xhs) => {
+  const index = xhsInstances.findIndex((e) => e === instance)
+  if (index !== -1) {
+    xhsInstances.splice(index, 1)
+    console.log('removeXhsInstances success')
+  }
+}
+
 type GetInstanceParams = {
   baseCookie: string
   creatorCookie: string
@@ -26,7 +34,8 @@ export async function getXhsInstance(params: GetInstanceParams) {
   if (!__browser) {
     __browser = await launch({
       defaultViewport: null,
-      devtools: false
+      devtools: false,
+      headless: false
     })
   }
   const browser = __browser

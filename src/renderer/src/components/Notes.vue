@@ -191,7 +191,7 @@ onMounted(() => {
     </div>
     <n-data-table
       bordered
-      max-height="420"
+      max-height="800"
       :columns="state.tableColumns"
       :data="state.tableData"
       :pagination="state.pagination"

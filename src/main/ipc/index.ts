@@ -1,6 +1,6 @@
-import { IpcMainEvent, ipcMain } from 'electron'
+import { IpcMainEvent, OpenDialogOptions, dialog, ipcMain } from 'electron'
 import { IpcChannel } from '@shared/ipc'
-import { getXhsInstance, xhsInstances } from '../puppeteer'
+import { getXhsInstance, removeXhsInstances, xhsInstances } from '../puppeteer'
 import { systemDb } from '../lowdb'
 
 export const listeners = {
@@ -131,6 +131,54 @@ export const listeners = {
 
   [IpcChannel.GetArticleList]: async (_event: IpcMainEvent) => {
     return systemDb.data.articles
+  },
+
+  [IpcChannel.ShowOpenDialogSync]: async (_event: IpcMainEvent, options: OpenDialogOptions) => {
+    try {
+      return (await dialog.showOpenDialogSync(options)) || []
+    } catch (error) {
+      console.log('show open error: ', error)
+    }
+    return []
+  },
+
+  // 创建新的笔记
+  // 根据传进来的参数，挨个打开账号，输入文本，标题，图片，然后发送
+  [IpcChannel.NewNotes]: async (_event: IpcMainEvent, params: CreateNewsForm) => {
+    console.log('params: ', params)
+
+    const { accounts, title, desc, pictures, isPublic } = params
+    for (let i = 0; i < accounts.length; i++) {
+      const xhsInstance = await getXhsInstance({
+        ...accounts[i]
+      })
+      await xhsInstance
+        .publicPicText({
+          title,
+          desc,
+          pictures,
+          isPublic
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+      await xhsInstance.page.close()
+      await removeXhsInstances(xhsInstance)
+      await systemDb.db.read()
+      const articles = systemDb.data.articles || []
+      articles.push({
+        title,
+        desc,
+        pictures,
+        user_id: accounts[i].user_id,
+        account: accounts[i],
+        create_time: Date.now()
+      })
+      systemDb.data.articles = articles
+      await systemDb.db.write()
+    }
+
+    return true
   }
 }
 

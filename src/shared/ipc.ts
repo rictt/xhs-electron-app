@@ -21,7 +21,11 @@ export const enum IpcChannel {
 
   GetArticleList = 'GetArticleList',
 
-  GetArticle = 'GetArticle'
+  GetArticle = 'GetArticle',
+
+  ShowOpenDialogSync = 'ShowOpenDialogSync',
+
+  NewNotes = 'NewNotes'
 }
 
 export type IpcMainEventList = {

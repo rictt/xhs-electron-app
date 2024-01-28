@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, protocol, net } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -7,8 +7,8 @@ import { registerIpcMainEvent } from './ipc'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1200,
+    height: 870,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -35,6 +35,9 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  protocol.handle('xhsimage', (request) => {
+    return net.fetch('file://' + request.url.slice('xhsimage://'.length))
+  })
   electronApp.setAppUserModelId('com.electron')
 
   app.on('browser-window-created', (_, window) => {

@@ -412,6 +412,7 @@ export class Xhs extends EventEmitter {
 
   async onPublishNoteResponse(data) {
     console.log('发布成功: ', data)
+    this.emit('publish:success')
   }
 
   async publishNotice() {
@@ -459,16 +460,79 @@ export class Xhs extends EventEmitter {
     // console.log('发布中')
   }
 
-  async publicPicText() {
-    console.log('发布图文')
-    /**
-     * 预先设置
-     *  图片、标题、描述信息
-     *  发布设置
-     * 进一步
-     *  选择发布的账号
-     * 第三步
-     *  生成发布的内容预览，这里可对标题、描述细微修改
-     */
+  async publicPicText(options: PublishOptions) {
+    return new Promise(async (resolve, reject) => {
+      let timer = setTimeout(() => {
+        reject('发布超时')
+      }, 1000 * 3000)
+      this.on('publish:success', () => {
+        clearTimeout(timer)
+        timer = null
+        resolve('')
+      })
+      const { pictures, title, desc, isPublic } = options
+      await this.page.goto('https://creator.xiaohongshu.com/publish/publish')
+      await this.timeout()
+      await this.page.waitForSelector('.header .tab:nth-child(2)')
+      await this.page.$eval('.header .tab:nth-child(2)', (el: HTMLElement) => {
+        el.click()
+      })
+      const uploadInput = await this.page.waitForSelector('.upload-input')
+      for (let i = 0; i < pictures.length; i++) {
+        await uploadInput.uploadFile(pictures[i])
+      }
+      await this.timeout()
+      await this.page.waitForSelector('.c-input_inner')
+      await this.page.type('.c-input_inner', title, {
+        delay: 50
+      })
+      await this.page.waitForSelector('.post-content', { timeout: 60 })
+      await this.page.type('.post-content', desc, {
+        delay: 50
+      })
+
+      const awaitUploadSuccess = async () => {
+        return new Promise((resolve) => {
+          const checkFunction = async () => {
+            const masks = await this.page.$$('.img-container .mask')
+            const masksClass = await this.page.$$eval('.img-container .mask', (nodes) => {
+              return nodes.map((e) => e.className)
+            })
+            const flag1 = masks.length === pictures.length
+            const flag2 = !masksClass.includes('uploading')
+            const flag3 = !masksClass.includes('failed')
+            if (flag1 && flag2 && flag3) {
+              console.log('call!')
+              resolve('')
+            } else {
+              setTimeout(async () => {
+                await checkFunction()
+              }, 1000)
+            }
+          }
+          checkFunction()
+        })
+      }
+      await awaitUploadSuccess()
+      console.log('1111')
+      await Promise.all([
+        this.page.waitForSelector('._title'),
+        this.page.waitForSelector('._title label')
+      ])
+      if (isPublic) {
+        await this.page.$$eval('._title', (nodes: HTMLElement[]) => {
+          // 设置公开
+          nodes[1].querySelectorAll('label')[0].click()
+        })
+      } else {
+        await this.page.$$eval('._title', (nodes: HTMLElement[]) => {
+          // 设置私密
+          nodes[1].querySelectorAll('label')[1].click()
+        })
+      }
+      await this.timeout()
+      await this.page.click('.publishBtn')
+      console.log('发布图文作品中..')
+    })
   }
 }
