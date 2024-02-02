@@ -208,8 +208,8 @@ export class Xhs extends EventEmitter {
     await this.timeout()
     const list = await this.page.$$eval(
       '.note-item',
-      (eles, user_id) => {
-        return eles.map((e) => {
+      function (eles, user_id) {
+        return eles.map(function (e) {
           const noteHref = e.querySelector('a')?.href
           const title = (e.querySelector('.footer span') as HTMLElement)?.innerText
           const count = (e.querySelector('.count') as HTMLElement)?.innerText
@@ -479,6 +479,7 @@ export class Xhs extends EventEmitter {
       })
       const uploadInput = await this.page.waitForSelector('.upload-input')
       for (let i = 0; i < pictures.length; i++) {
+        // @ts-ignore: 11
         await uploadInput.uploadFile(pictures[i])
       }
       await this.timeout()

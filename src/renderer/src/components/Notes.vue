@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { NButton, NIcon, NDataTable, NInput, NSpin, useMessage } from 'naive-ui'
+import { NButton, NIcon, NDataTable, NInput, NSpin, DataTableColumn, useMessage } from 'naive-ui'
 import { onMounted, reactive, toRaw, inject } from 'vue'
 import { RefreshSharp } from '@vicons/ionicons5'
 import { Edit } from '@vicons/carbon'
@@ -105,7 +105,7 @@ const createColumns = () => {
         )
       }
     }
-  ]
+  ] as DataTableColumn[]
 }
 
 const state = reactive({

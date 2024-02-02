@@ -1,10 +1,11 @@
 import { resolve } from 'path'
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import { defineConfig, externalizeDepsPlugin, bytecodePlugin } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 
 export default defineConfig({
   main: {
+    // plugins: [externalizeDepsPlugin(), bytecodePlugin()],
     plugins: [externalizeDepsPlugin()],
     resolve: {
       alias: {
@@ -14,7 +15,7 @@ export default defineConfig({
     }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin(), bytecodePlugin()]
   },
   renderer: {
     resolve: {
@@ -23,6 +24,6 @@ export default defineConfig({
         '@shared': resolve('src/shared')
       }
     },
-    plugins: [vue(), vueJsx()]
+    plugins: [vue(), vueJsx(), bytecodePlugin()]
   }
 })

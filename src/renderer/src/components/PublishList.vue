@@ -4,7 +4,7 @@ import { onMounted, reactive } from 'vue'
 import { RefreshSharp } from '@vicons/ionicons5'
 import { IpcChannel } from '@shared/ipc'
 import ImageList from './ImageList.vue'
-import { requireNativeImage, replaceNativeImageScheme } from '@renderer/utils'
+import { requireNativeImage } from '@renderer/utils'
 
 const createColumns = () => {
   return [
