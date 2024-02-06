@@ -5,8 +5,6 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 
 export default defineConfig({
   main: {
-    // plugins: [externalizeDepsPlugin(), bytecodePlugin()],
-    plugins: [externalizeDepsPlugin()],
     resolve: {
       alias: {
         '@main': resolve('src/main'),
