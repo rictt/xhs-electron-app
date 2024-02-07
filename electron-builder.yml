@@ -1,5 +1,7 @@
-appId: com.electron.app
+appId: com.xfox.app
 productName: xFox
+# afterSign: "./build/afterSign.js"
+asar: false
 directories:
   buildResources: build
 files:

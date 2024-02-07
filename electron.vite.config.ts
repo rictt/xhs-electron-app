@@ -22,6 +22,6 @@ export default defineConfig({
         '@shared': resolve('src/shared')
       }
     },
-    plugins: [vue(), vueJsx(), bytecodePlugin()]
+    plugins: [vue(), vueJsx()]
   }
 })
