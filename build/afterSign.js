@@ -1,10 +1,3 @@
-// module.exports = function (params) {
-//   const { appOutDir, packager } = params
-//   console.log('after sign!!!')
-//   console.log('params: ', params)
-//   console.log(appOutDir, packager)
-// }
-
 const fs = require('fs')
 const path = require('path')
 const asar = require('asar')
@@ -32,12 +25,12 @@ function getFiles(dirpath, exclude) {
 }
 
 async function afterSign({ appOutDir, packager }) {
-  appOutDir = '/Users/joey/Code/crawler/xhs-electron-app/dist/mac-arm64'
+  // appOutDir = '/Users/joey/Code/crawler/xhs-electron-app/dist/mac-arm64'
   try {
-    // const asarPath = path.join(packager.getResourcesDir(appOutDir), 'app.asar')
-    // const appPath = path.join(packager.getResourcesDir(appOutDir), 'app')
-    const asarPath = appOutDir + '/app.asar'
-    const appPath = appOutDir + '/xFox.app/Contents/Resources/app'
+    const asarPath = path.join(packager.getResourcesDir(appOutDir), 'app.asar')
+    const appPath = path.join(packager.getResourcesDir(appOutDir), 'app')
+    // const asarPath = appOutDir + '/app.asar'
+    // const appPath = appOutDir + '/xFox.app/Contents/Resources/app'
     console.log('asar path: ', asarPath)
     console.log('app path: ', appPath)
     if (fs.existsSync(asarPath)) {
@@ -55,11 +48,13 @@ async function afterSign({ appOutDir, packager }) {
       '.cjs',
       '.json',
       '.xml',
-      'jsc',
+      '.jsc',
       '.png',
       '.woff2',
       '.DS_Store'
-    ]).filter((e) => !e.includes('out/main'))
+    ]).filter((e) => {
+      return ['vendor', 'out/preload', 'out/renderer'].every((str) => !e.includes(str))
+    })
 
     console.log(fileArrs)
 

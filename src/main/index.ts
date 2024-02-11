@@ -4,6 +4,11 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { systemDb } from './lowdb'
 import { registerIpcMainEvent } from './ipc'
+import log from 'electron-log/main'
+
+log.initialize()
+
+log.info('main start')
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -19,6 +24,7 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', async () => {
+    log.info('ready-to-show')
     mainWindow.show()
   })
 

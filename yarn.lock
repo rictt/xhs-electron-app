@@ -1509,6 +1509,13 @@ buffer@^5.1.0, buffer@^5.2.1:
     base64-js "^1.3.1"
     ieee754 "^1.1.13"
 
+bufferutil@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.npmmirror.com/bufferutil/-/bufferutil-4.0.8.tgz#1de6a71092d65d7766c4d8a522b261a6e787e8ea"
+  integrity sha512-4T53u4PdgsXqKaIctwF8ifXlRTTmEPJ8iEPWFdGZvcf7sbwYo6FKFEX9eNNAnzFZ7EzJAQ3CJeOtCRA4rDp7Pw==
+  dependencies:
+    node-gyp-build "^4.3.0"
+
 builder-util-runtime@9.2.3:
   version "9.2.3"
   resolved "https://registry.npmmirror.com/builder-util-runtime/-/builder-util-runtime-9.2.3.tgz#0a82c7aca8eadef46d67b353c638f052c206b83c"
@@ -1624,13 +1631,13 @@ chownr@^2.0.0:
   resolved "https://registry.npmmirror.com/chownr/-/chownr-2.0.0.tgz#15bfbe53d2eab4cf70f18a8cd68ebe5b3cb1dece"
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
-chromium-bidi@0.5.2:
-  version "0.5.2"
-  resolved "https://registry.npmmirror.com/chromium-bidi/-/chromium-bidi-0.5.2.tgz#358b03bb7c53e0f8d0fd77d596ea67ee30f7ff06"
-  integrity sha512-PbVOSddxgKyj+JByqavWMNqWPCoCaT6XK5Z1EFe168sxnB/BM51LnZEPXSbFcFAJv/+u2B4XNTs9uXxy4GW3cQ==
+chromium-bidi@0.5.8:
+  version "0.5.8"
+  resolved "https://registry.npmmirror.com/chromium-bidi/-/chromium-bidi-0.5.8.tgz#5053038425c062ed34b9bc973e84e79de0a5cef0"
+  integrity sha512-blqh+1cEQbHBKmok3rVJkBlBxt9beKBgOsxbFgs7UJcoVbbeZ+K7+6liAsjgpc8l1Xd55cQUy14fXZdGSb4zIw==
   dependencies:
     mitt "3.0.1"
-    urlpattern-polyfill "9.0.0"
+    urlpattern-polyfill "10.0.0"
 
 chromium-pickle-js@^0.2.0:
   version "0.2.0"
@@ -1756,15 +1763,15 @@ core-util-is@1.0.2:
   resolved "https://registry.npmmirror.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
   integrity sha512-3lqz5YjWTYnW6dlDa5TLaTCcShfar1e40rmcJVwCBJC6mWlFuj0eCHIElmG1g5kyuJ/GD+8Wn4FFCcz4gJPfaQ==
 
-cosmiconfig@8.3.6:
-  version "8.3.6"
-  resolved "https://registry.npmmirror.com/cosmiconfig/-/cosmiconfig-8.3.6.tgz#060a2b871d66dba6c8538ea1118ba1ac16f5fae3"
-  integrity sha512-kcZ6+W5QzcJ3P1Mt+83OUv/oHFqZHIx8DuxG6eZ5RGMERoLqp4BuGjhHLYGK+Kf5XVkQvqBSmAy/nGWN3qDgEA==
+cosmiconfig@9.0.0:
+  version "9.0.0"
+  resolved "https://registry.npmmirror.com/cosmiconfig/-/cosmiconfig-9.0.0.tgz#34c3fc58287b915f3ae905ab6dc3de258b55ad9d"
+  integrity sha512-itvL5h8RETACmOTFc4UfIyB2RfEHi71Ax6E/PivVxq9NseKbOWpeyHEOIbmAw1rs8Ak0VursQNww7lf7YtUwzg==
   dependencies:
+    env-paths "^2.2.1"
     import-fresh "^3.3.0"
     js-yaml "^4.1.0"
     parse-json "^5.2.0"
-    path-type "^4.0.0"
 
 crc@^3.8.0:
   version "3.8.0"
@@ -1910,10 +1917,10 @@ detect-node@^2.0.4:
   resolved "https://registry.npmmirror.com/detect-node/-/detect-node-2.1.0.tgz#c9c70775a49c3d03bc2c06d9a73be550f978f8b1"
   integrity sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==
 
-devtools-protocol@0.0.1203626:
-  version "0.0.1203626"
-  resolved "https://registry.npmmirror.com/devtools-protocol/-/devtools-protocol-0.0.1203626.tgz#4366a4c81a7e0d4fd6924e9182c67f1e5941e820"
-  integrity sha512-nEzHZteIUZfGCZtTiS1fRpC8UZmsfD1SiyPvaUNvS13dvKf666OAm8YTi0+Ca3n1nLEyu49Cy4+dPWpaHFJk9g==
+devtools-protocol@0.0.1232444:
+  version "0.0.1232444"
+  resolved "https://registry.npmmirror.com/devtools-protocol/-/devtools-protocol-0.0.1232444.tgz#406345a90a871ba852c530d73482275234936eed"
+  integrity sha512-pM27vqEfxSxRkTMnF+XCmxSEb6duO5R+t8A9DEEJgy4Wz2RVanje2mmj99B6A3zv2r/qGfYlOvYznUhuokizmg==
 
 dir-compare@^3.0.0:
   version "3.3.0"
@@ -2004,6 +2011,11 @@ electron-builder@^24.9.1:
     simple-update-notifier "2.0.0"
     yargs "^17.6.2"
 
+electron-log@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.npmmirror.com/electron-log/-/electron-log-5.1.1.tgz#3341c0265339c6c8285a91840cb7c872008103d6"
+  integrity sha512-If7HU4Slbh2xfjOXOLxifkbgu6HmWDNJyXPLW+XNTOHMfFKisg0trA3d/7syyu25S+lHosfsd0VMfDSjGn1+Pw==
+
 electron-publish@24.8.1:
   version "24.8.1"
   resolved "https://registry.npmmirror.com/electron-publish/-/electron-publish-24.8.1.tgz#4216740372bf4297a429543402a1a15ce8c3560b"
@@ -2079,7 +2091,7 @@ entities@^4.5.0:
   resolved "https://registry.npmmirror.com/entities/-/entities-4.5.0.tgz#5d268ea5e7113ec74c4d033b79ea5a35a488fb48"
   integrity sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==
 
-env-paths@^2.2.0:
+env-paths@^2.2.0, env-paths@^2.2.1:
   version "2.2.1"
   resolved "https://registry.npmmirror.com/env-paths/-/env-paths-2.2.1.tgz#420399d416ce1fbe9bc0a07c62fa68d67fd0f8f2"
   integrity sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==
@@ -3408,6 +3420,11 @@ node-fetch@^2.6.12:
   dependencies:
     whatwg-url "^5.0.0"
 
+node-gyp-build@^4.3.0:
+  version "4.8.0"
+  resolved "https://registry.npmmirror.com/node-gyp-build/-/node-gyp-build-4.8.0.tgz#3fee9c1731df4581a3f9ead74664369ff00d26dd"
+  integrity sha512-u6fs2AEUljNho3EYTJNBfImO5QTo/J/1Etd+NVdCj7qWKUSN/bSLkZwhDv7I+w/MSC6qJ4cknepkAYykDdK8og==
+
 node-releases@^2.0.14:
   version "2.0.14"
   resolved "https://registry.npmmirror.com/node-releases/-/node-releases-2.0.14.tgz#2ffb053bceb8b2be8495ece1ab6ce600c4461b0b"
@@ -3694,26 +3711,26 @@ punycode@^2.1.0:
   resolved "https://registry.npmmirror.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-puppeteer-core@21.7.0:
-  version "21.7.0"
-  resolved "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-21.7.0.tgz#c0abb98cbd17dbd7ee317b4257958337fa25d2c7"
-  integrity sha512-elPYPozrgiM3phSy7VDUJCVWQ07SPnOm78fpSaaSNFoQx5sur/MqhTSro9Wz8lOEjqCykGC6WRkwxDgmqcy1dQ==
+puppeteer-core@21.11.0:
+  version "21.11.0"
+  resolved "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-21.11.0.tgz#6c60ec350f1a3a2152179c68166da6edfce18a23"
+  integrity sha512-ArbnyA3U5SGHokEvkfWjW+O8hOxV1RSJxOgriX/3A4xZRqixt9ZFHD0yPgZQF05Qj0oAqi8H/7stDorjoHY90Q==
   dependencies:
     "@puppeteer/browsers" "1.9.1"
-    chromium-bidi "0.5.2"
+    chromium-bidi "0.5.8"
     cross-fetch "4.0.0"
     debug "4.3.4"
-    devtools-protocol "0.0.1203626"
+    devtools-protocol "0.0.1232444"
     ws "8.16.0"
 
-puppeteer@^21.7.0:
-  version "21.7.0"
-  resolved "https://registry.npmmirror.com/puppeteer/-/puppeteer-21.7.0.tgz#c4b46ef28a2986f9c536eb086ab47c8dea80e4f9"
-  integrity sha512-Yy+UUy0b9siJezbhHO/heYUoZQUwyqDK1yOQgblTt0l97tspvDVFkcW9toBlnSvSfkDmMI3Dx9cZL6R8bDArHA==
+puppeteer@21:
+  version "21.11.0"
+  resolved "https://registry.npmmirror.com/puppeteer/-/puppeteer-21.11.0.tgz#46e64067b742b0e17a3b8dc668bc437f45cdd9f1"
+  integrity sha512-9jTHuYe22TD3sNxy0nEIzC7ZrlRnDgeX3xPkbS7PnbdwYjl2o/z/YuCrRBwezdKpbTDTJ4VqIggzNyeRcKq3cg==
   dependencies:
     "@puppeteer/browsers" "1.9.1"
-    cosmiconfig "8.3.6"
-    puppeteer-core "21.7.0"
+    cosmiconfig "9.0.0"
+    puppeteer-core "21.11.0"
 
 queue-microtask@^1.2.2:
   version "1.2.3"
@@ -4256,10 +4273,17 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-urlpattern-polyfill@9.0.0:
-  version "9.0.0"
-  resolved "https://registry.npmmirror.com/urlpattern-polyfill/-/urlpattern-polyfill-9.0.0.tgz#bc7e386bb12fd7898b58d1509df21d3c29ab3460"
-  integrity sha512-WHN8KDQblxd32odxeIgo83rdVDE2bvdkb86it7bMhYZwWKJz0+O0RK/eZiHYnM+zgt/U7hAHOlCQGfjjvSkw2g==
+urlpattern-polyfill@10.0.0:
+  version "10.0.0"
+  resolved "https://registry.npmmirror.com/urlpattern-polyfill/-/urlpattern-polyfill-10.0.0.tgz#f0a03a97bfb03cdf33553e5e79a2aadd22cac8ec"
+  integrity sha512-H/A06tKD7sS1O1X2SshBVeA5FLycRpjqiBeqGKmBwBDBy28EnRjORxTNe269KSSr5un5qyWi1iL61wLxpd+ZOg==
+
+utf-8-validate@^6.0.3:
+  version "6.0.3"
+  resolved "https://registry.npmmirror.com/utf-8-validate/-/utf-8-validate-6.0.3.tgz#7d8c936d854e86b24d1d655f138ee27d2636d777"
+  integrity sha512-uIuGf9TWQ/y+0Lp+KGZCMuJWc3N9BHA+l/UmHd/oUHwJJDeysyTRxNQVkbzsIWfGFbRe3OcgML/i0mvVRPOyDA==
+  dependencies:
+    node-gyp-build "^4.3.0"
 
 utf8-byte-length@^1.0.1:
   version "1.0.4"

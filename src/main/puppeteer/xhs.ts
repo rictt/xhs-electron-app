@@ -167,7 +167,7 @@ export class Xhs extends EventEmitter {
 
       if (has_more) {
         console.log('has more call')
-        await this.page.screenshot({ path: 'note1.png' })
+        // await this.page.screenshot({ path: 'note1.png' })
         // 尺寸不同的滚动容器不一样，这里要考虑下兼容
         // 如果设备固定是1920 * 1080，就无所谓了
         await this.page.waitForSelector('.note-scroller')
@@ -200,7 +200,7 @@ export class Xhs extends EventEmitter {
     }
     this.loading = true
     await this.page.goto(`https://www.xiaohongshu.com/user/profile/${this.user_id}`)
-    await this.page.screenshot({ path: 'me.png' })
+    // await this.page.screenshot({ path: 'me.png' })
     await Promise.all([
       this.page.waitForSelector('.note-item'),
       this.page.waitForSelector('.cover')
@@ -242,7 +242,7 @@ export class Xhs extends EventEmitter {
     }
     this.status = 'fetch_comments'
     await this.page.goto(`https://www.xiaohongshu.com/explore/${id}`)
-    await this.page.screenshot({ path: 'note.png' })
+    // await this.page.screenshot({ path: 'note.png' })
     await this.page.waitForSelector('.content', {
       timeout: 1000 * 60
     })
@@ -404,7 +404,7 @@ export class Xhs extends EventEmitter {
       await this.page.type('#content-textarea', reply_text, {
         delay: 100
       })
-      await this.page.screenshot({ path: 'comment.png' })
+      // await this.page.screenshot({ path: 'comment.png' })
       await this.timeout()
       await this.page.$eval('.submit', (el: HTMLElement) => el.click())
     })

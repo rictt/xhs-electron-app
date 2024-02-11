@@ -1,7 +1,9 @@
 appId: com.xfox.app
 productName: xFox
+# 加密完打开直接闪退，先忽略
+# 手动加密后的包夹在有问题
 # afterSign: "./build/afterSign.js"
-asar: false
+asar: true
 directories:
   buildResources: build
 files:

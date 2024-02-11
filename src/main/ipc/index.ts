@@ -2,6 +2,7 @@ import { IpcMainEvent, OpenDialogOptions, dialog, ipcMain } from 'electron'
 import { IpcChannel } from '@shared/ipc'
 import { getXhsInstance, removeXhsInstances, xhsInstances } from '../puppeteer'
 import { systemDb } from '../lowdb'
+import log from 'electron-log/main'
 
 export const listeners = {
   [IpcChannel.OpenFileDialog]: (event: IpcMainEvent) => {
@@ -58,6 +59,7 @@ export const listeners = {
   },
 
   [IpcChannel.GetNoteList]: async (_event: IpcMainEvent, account: XhsAccount, sync?: boolean) => {
+    log.info('account: ', sync, account)
     if (sync) {
       try {
         console.log('account: ', account)
@@ -77,8 +79,10 @@ export const listeners = {
         const userOwn = result.filter((e) => e.user_id === account.user_id)
         console.log('write notes: ', systemDb.data.notes.length)
         await systemDb.db.write()
+        await xhs.page.close()
         return userOwn
       } catch (error) {
+        log.error('get Note list error: ', error)
         console.log('GetNoteList error: ', error)
         return []
       }

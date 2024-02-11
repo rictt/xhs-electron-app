@@ -10,10 +10,19 @@ export default defineConfig({
         '@main': resolve('src/main'),
         '@shared': resolve('src/shared')
       }
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['puppeteer']
+          }
+        }
+      }
     }
   },
   preload: {
-    plugins: [externalizeDepsPlugin(), bytecodePlugin()]
+    plugins: [externalizeDepsPlugin()]
   },
   renderer: {
     resolve: {
