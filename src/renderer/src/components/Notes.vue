@@ -4,6 +4,7 @@ import { onMounted, reactive, toRaw, inject } from 'vue'
 import { RefreshSharp } from '@vicons/ionicons5'
 import { Edit } from '@vicons/carbon'
 import { IpcChannel } from '@shared/ipc'
+import { Invoke } from '@renderer/utils/ipcRenderer'
 import { globalState } from '@renderer/store'
 
 const account = inject<XhsAccount>('account')
@@ -48,7 +49,7 @@ const createColumns = () => {
         }
         if (state.editReplyIndex === index) {
           const onBlur = () => {
-            window.electron.ipcRenderer.invoke(
+            Invoke(
               IpcChannel.UpdateNote,
               row.note_id,
               'reply_text',
@@ -127,15 +128,11 @@ const fetchAccountNotes = async (account: XhsAccount, sync: boolean = false) => 
   if (state.loading) {
     return
   }
-  state.loading = true
   try {
-    const notes = await window.electron.ipcRenderer.invoke(
-      IpcChannel.GetNoteList,
-      toRaw(account),
-      sync
-    )
+    const notes = await Invoke(IpcChannel.GetNoteList, toRaw(account), sync)
+    state.loading = true
     console.log('notes: ', notes)
-    state.tableData = notes
+    state.tableData = notes || []
   } catch (error) {
     console.log(error)
     message.error(error)
@@ -151,12 +148,7 @@ const monitorNote = async (row: NoteDataItem) => {
     return
   }
   console.log('monitor ', note_id)
-  const monitorId = await window.electron.ipcRenderer.invoke(
-    IpcChannel.StartNoteMonitor,
-    toRaw(account),
-    note_id,
-    reply_text
-  )
+  const monitorId = await Invoke(IpcChannel.StartNoteMonitor, toRaw(account), note_id, reply_text)
   // state.monitorId = monitorId
   row.monitor_id = monitorId
   row.status = 'monitor'
@@ -164,7 +156,7 @@ const monitorNote = async (row: NoteDataItem) => {
 
 const cancelMonitorNote = async (row: NoteDataItem) => {
   if (!row.monitor_id) {
-    await window.electron.ipcRenderer.invoke(IpcChannel.CancelNoteMonitor, row.monitor_id)
+    await Invoke(IpcChannel.CancelNoteMonitor, row.monitor_id)
   }
   row.status = 'idle'
 }

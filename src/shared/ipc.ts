@@ -25,9 +25,19 @@ export const enum IpcChannel {
 
   ShowOpenDialogSync = 'ShowOpenDialogSync',
 
-  NewNotes = 'NewNotes'
+  NewNotes = 'NewNotes',
+
+  Auth = 'Auth',
+
+  SetAuthCode = 'SetAuthCode'
 }
 
 export type IpcMainEventList = {
   [IpcChannel.OpenFileDialog]: (event: IpcMainEvent, args: number) => void
 }
+
+export const AuthList: string[] = [
+  IpcChannel.GetNoteList,
+  IpcChannel.StartNoteMonitor,
+  IpcChannel.NewNotes
+]

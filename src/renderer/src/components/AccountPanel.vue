@@ -12,8 +12,8 @@ provide<XhsAccount>('account', props.account)
 const state = reactive({
   tabs: [
     { name: 'Notes', label: '笔记列表' },
-    { name: 'Fans', label: '粉丝列表' },
-    { name: 'CareList', label: '我关注的' }
+    // { name: 'Fans', label: '粉丝列表' },
+    // { name: 'CareList', label: '我关注的' }
   ],
   currentTab: 'Notes'
 })

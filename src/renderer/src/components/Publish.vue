@@ -19,6 +19,7 @@ import { IpcChannel } from '@shared/ipc'
 import ImageList from './ImageList.vue'
 import { requireNativeImage, replaceNativeImageScheme } from '@renderer/utils'
 import type { OpenDialogOptions } from 'electron'
+import { Invoke } from '@renderer/utils/ipcRenderer'
 
 const rules = reactive<FormRules>({
   title: {
@@ -73,7 +74,7 @@ const handleValidateClick = async (e: MouseEvent) => {
       .filter((e) => e)
       .map((e) => toRaw(e))
 
-    await window.electron.ipcRenderer.invoke(IpcChannel.NewNotes, {
+    await Invoke(IpcChannel.NewNotes, {
       accounts: accounts,
       title: formValue.title,
       desc: formValue.desc,
@@ -87,7 +88,7 @@ const handleValidateClick = async (e: MouseEvent) => {
 }
 
 const selectImgFiles = async () => {
-  const filePaths = await window.electron.ipcRenderer.invoke(IpcChannel.ShowOpenDialogSync, {
+  const filePaths = await Invoke(IpcChannel.ShowOpenDialogSync, {
     title: '选择图片',
     filters: [{ name: 'Images', extensions: ['jpg', 'png', 'jpeg'] }],
     properties: ['openFile', 'multiSelections']
@@ -103,7 +104,7 @@ const selectImgFiles = async () => {
 }
 
 onMounted(async () => {
-  globalState.accountList = await window.electron.ipcRenderer.invoke(IpcChannel.GetAccountList)
+  globalState.accountList = await Invoke(IpcChannel.GetAccountList)
 })
 </script>
 

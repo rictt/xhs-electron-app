@@ -19,7 +19,13 @@ export default defineConfig({
           }
         }
       }
-    }
+    },
+    plugins: [
+      externalizeDepsPlugin(),
+      bytecodePlugin({
+        transformArrowFunctions: false
+      })
+    ]
   },
   preload: {
     plugins: [externalizeDepsPlugin()]

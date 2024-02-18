@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
+import AppContainer from './components/AppContainer.vue'
 import { NConfigProvider, GlobalThemeOverrides, NMessageProvider } from 'naive-ui'
 
 const themeOverrides: GlobalThemeOverrides = {
@@ -14,23 +15,15 @@ const themeOverrides: GlobalThemeOverrides = {
     // textColorText: '#ff0000'
   }
 }
+
 </script>
 
 <template>
   <NConfigProvider :theme-overrides="themeOverrides" style="height: 100%">
     <NMessageProvider>
-      <div class="container">
-        <Left />
-        <Right />
-      </div>
+      <AppContainer />
     </NMessageProvider>
   </NConfigProvider>
 </template>
 
-<style lang="less" scoped>
-.container {
-  display: flex;
-  height: 100%;
-  justify-content: space-between;
-}
-</style>
+<style lang="less" scoped></style>

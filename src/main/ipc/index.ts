@@ -1,10 +1,20 @@
 import { IpcMainEvent, OpenDialogOptions, dialog, ipcMain } from 'electron'
-import { IpcChannel } from '@shared/ipc'
+import { AuthList, IpcChannel } from '@shared/ipc'
 import { getXhsInstance, removeXhsInstances, xhsInstances } from '../puppeteer'
 import { systemDb } from '../lowdb'
 import log from 'electron-log/main'
+import { Auth, setCode } from '@main/utils/auth'
 
 export const listeners = {
+  [IpcChannel.SetAuthCode]: (_event, code: string) => {
+    return setCode(code)
+  },
+
+  [IpcChannel.Auth]: async (_event, code = '') => {
+    setCode(code)
+    return await Auth()
+  },
+
   [IpcChannel.OpenFileDialog]: (event: IpcMainEvent) => {
     console.log(event)
   },
@@ -59,7 +69,7 @@ export const listeners = {
   },
 
   [IpcChannel.GetNoteList]: async (_event: IpcMainEvent, account: XhsAccount, sync?: boolean) => {
-    log.info('account: ', sync, account)
+    log.info('account: ', sync, !!account)
     if (sync) {
       try {
         console.log('account: ', account)
@@ -189,6 +199,17 @@ export const listeners = {
 export const registerIpcMainEvent = () => {
   Object.entries(listeners).forEach((item) => {
     const [name, handler] = item
-    ipcMain.handle(name, handler)
+    if (AuthList.includes(name)) {
+      ipcMain.handle(name, async (event: IpcMainEvent, ...rest) => {
+        try {
+          await Auth()
+          return await handler(event, ...rest)
+        } catch (error) {
+          console.log('鉴权失败: ', name)
+        }
+      })
+    } else {
+      ipcMain.handle(name, handler)
+    }
   })
 }

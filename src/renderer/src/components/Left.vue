@@ -8,6 +8,7 @@ import {
   NForm,
   NFormItem,
   NInput,
+  NIcon,
   NModal,
   useMessage
 } from 'naive-ui'
@@ -15,10 +16,19 @@ import { AddSharp, PersonAddOutline } from '@vicons/ionicons5'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { IpcChannel } from '@shared/ipc'
 import { globalState } from '@renderer/store/index'
+import { Edit } from '@vicons/carbon'
+import { getAuthCode, setAuthCode } from '@renderer/utils'
+import { Invoke } from '@renderer/utils/ipcRenderer'
 
 const message = useMessage()
 
+const newInput = ref('')
+
 const state = reactive({
+  editAuthcode: false,
+  authcode: '',
+  newAuthcode: '',
+  // authcode: '',
   modalShow: false,
   accounts: [] as XhsAccount[],
   currentUserId: globalState.currentAccount?.user_id,
@@ -135,30 +145,54 @@ const showManagePublish = () => {
   globalState.activeComponetName = 'Publish'
 }
 
+const editNew = () => {
+  state.editAuthcode = true
+  console.log(newInput.value)
+  setTimeout(() => {
+    newInput.value.focus()
+  })
+}
+const onCodeBlurChange = async () => {
+  state.editAuthcode = false
+  if (state.newAuthcode) {
+    state.authcode = state.newAuthcode
+    state.newAuthcode = ''
+    setAuthCode(state.authcode)
+    await Invoke(IpcChannel.SetAuthCode, state.authcode)
+  }
+}
+
 onMounted(async () => {
   const list = await getAccounts()
   state.accounts = list
   globalState.accountList = list
+  const code = getAuthCode()
+  if (code) {
+    state.authcode = code
+  }
 })
 </script>
 <template>
   <div class="left-container">
     <div class="account">
-      <img
-        class="avatar"
-        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMkAAABICAMAAABr9CFKAAAAP1BMVEUAAAD/I0L/JEL/JEH/JED/IED/JEH/JUL/JEL/I0H/IED/I0L/JEH/JUD/JEH/I0L/I0D/JEH/I0P/JEP/JEKyzp5HAAAAFHRSTlMA34BgQB+/n++gEJCwMHCfUM9Qz4ilXboAAAQzSURBVGje1ZrrtqMgDIW5S/HSm+//rLNmbFdNNybUg0zP/nd6DOaTkEBUbSr5lZIq1BRWGtROuXkt9UPZeaVQaqXXVt0vJiFGs/9Ckuu+KflCEl1mcyMeuF9MErYi8j5z6tUiP7O6B+MUle/jPOvO1yRBTyyJOk4dsWeljV/7GB+/3iqTnMHkxySoaDLBHMd6JDgllUhQ2uOooSpJTyxSPRJEQQ9dNRJMwZVJ8DEN659MLRKsikeSzANkyq4WCU7JoSSzeyfpK5HglBxMEt5JLpVIsCoeQkIfVRAdlEnkFHw4yURJbCUSrIqHkwyExNSr8R5cO5hEr0jCs5hczEo3nmTs1kr5KZnjZF/6N5hZFCjB2z3T0+RELjOLek1uoZRbLr74/FrtBBLIUMzTxMVvIJUW7+rxVxTmZSTJuzyChyhXhQRj1EslzfAkKe+KZuK5IUmE/MmseEi25FqUbUlCzC4Cic65GeQpaU/iPiEx4no3LUiYRYwkbHqYmE1FKxI08wLJKZOyT0zN+38k6hOSgR4WUb4VCbocGRL0JWRuDKTtSCZwmSGBq9nC6OqSRJYEnzKSyIA28ClYJjF6pUiHeert1xB6S3j6IhJx8+P/CapsKclp3qe73Rij40hwC5n4o8ABJCjtshXCSE55JjfBDuAQEpTZQQI7ArY0HUeCKPgcRRJuJZwhUA8kQT9gcJ4EwZnIa0USE0NikARfhRhuShqSzAYfpEgy5Dt/MJJrShJhlSaWBJM282ayKck8QqnjSLCQDkwKbksyba9sU/L7lWkMtyXp37aEV5EEyfNdCd0tmhqRdG9DBJnklj8EKLe7I4Htw4E6mdGgsa1GrAaZZNxYV+dDOxIoGykJHMxFEv9RF9IeRqIcSzLJJCrfwJiO7kjIb2wijJ0jEZPt/diOBApWOBRGkeSUC8fETEkjkjOkIolkIhaJI+lUQ5JI/pRI8DYXrqHqWpIYWPASSSL/8Ew5uaqWJB6GlkhUyMaP05iCW5IQv6IqIjEbS3q0hkq1JCFWQxmJK/1AsCkJCRYrkGBFGb+KxEGoSCTmZf5VJEpDqAgkI0ziZfwKkgkGFkhUwDfCMfSTpUoPt+xLAz0dwdUfkQxAkiJ4K3y+cSFTQq4FG68Lv3n4lMRnirpZ+eXtojPcB9a8TopzdsIz5n4SPI/1cD55TopmzhmwtO3W5xRYanRNErNpH15r5wYVnHs5dV1cZZztgLICSYpMR+Jh2cEo7PeSrvKUyCTYo8rvZLXPtbCZCtiXTkldEieZu5GNRa1Qt6IpCVVJcEAMGj4WbekHkPhWuDaJy1vLjUL5izvHhe25Bgnmmnz0o1IRcFFVnOuTTEwvCnQqAuGctUBZjQSDX49FARNNUpx6dkqqkmDwyw4OcXmhf+1sUry8DZsZot9LMuq1FFW6/vV/8XDonXroDwd3OfCOVCS+AAAAAElFTkSuQmCC"
-      />
-      <div class="account-id">账号ID：819221812</div>
+      <img class="avatar"
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMkAAABICAMAAABr9CFKAAAAP1BMVEUAAAD/I0L/JEL/JEH/JED/IED/JEH/JUL/JEL/I0H/IED/I0L/JEH/JUD/JEH/I0L/I0D/JEH/I0P/JEP/JEKyzp5HAAAAFHRSTlMA34BgQB+/n++gEJCwMHCfUM9Qz4ilXboAAAQzSURBVGje1ZrrtqMgDIW5S/HSm+//rLNmbFdNNybUg0zP/nd6DOaTkEBUbSr5lZIq1BRWGtROuXkt9UPZeaVQaqXXVt0vJiFGs/9Ckuu+KflCEl1mcyMeuF9MErYi8j5z6tUiP7O6B+MUle/jPOvO1yRBTyyJOk4dsWeljV/7GB+/3iqTnMHkxySoaDLBHMd6JDgllUhQ2uOooSpJTyxSPRJEQQ9dNRJMwZVJ8DEN659MLRKsikeSzANkyq4WCU7JoSSzeyfpK5HglBxMEt5JLpVIsCoeQkIfVRAdlEnkFHw4yURJbCUSrIqHkwyExNSr8R5cO5hEr0jCs5hczEo3nmTs1kr5KZnjZF/6N5hZFCjB2z3T0+RELjOLek1uoZRbLr74/FrtBBLIUMzTxMVvIJUW7+rxVxTmZSTJuzyChyhXhQRj1EslzfAkKe+KZuK5IUmE/MmseEi25FqUbUlCzC4Cic65GeQpaU/iPiEx4no3LUiYRYwkbHqYmE1FKxI08wLJKZOyT0zN+38k6hOSgR4WUb4VCbocGRL0JWRuDKTtSCZwmSGBq9nC6OqSRJYEnzKSyIA28ClYJjF6pUiHeert1xB6S3j6IhJx8+P/CapsKclp3qe73Rij40hwC5n4o8ABJCjtshXCSE55JjfBDuAQEpTZQQI7ArY0HUeCKPgcRRJuJZwhUA8kQT9gcJ4EwZnIa0USE0NikARfhRhuShqSzAYfpEgy5Dt/MJJrShJhlSaWBJM282ayKck8QqnjSLCQDkwKbksyba9sU/L7lWkMtyXp37aEV5EEyfNdCd0tmhqRdG9DBJnklj8EKLe7I4Htw4E6mdGgsa1GrAaZZNxYV+dDOxIoGykJHMxFEv9RF9IeRqIcSzLJJCrfwJiO7kjIb2wijJ0jEZPt/diOBApWOBRGkeSUC8fETEkjkjOkIolkIhaJI+lUQ5JI/pRI8DYXrqHqWpIYWPASSSL/8Ew5uaqWJB6GlkhUyMaP05iCW5IQv6IqIjEbS3q0hkq1JCFWQxmJK/1AsCkJCRYrkGBFGb+KxEGoSCTmZf5VJEpDqAgkI0ziZfwKkgkGFkhUwDfCMfSTpUoPt+xLAz0dwdUfkQxAkiJ4K3y+cSFTQq4FG68Lv3n4lMRnirpZ+eXtojPcB9a8TopzdsIz5n4SPI/1cD55TopmzhmwtO3W5xRYanRNErNpH15r5wYVnHs5dV1cZZztgLICSYpMR+Jh2cEo7PeSrvKUyCTYo8rvZLXPtbCZCtiXTkldEieZu5GNRa1Qt6IpCVVJcEAMGj4WbekHkPhWuDaJy1vLjUL5izvHhe25Bgnmmnz0o1IRcFFVnOuTTEwvCnQqAuGctUBZjQSDX49FARNNUpx6dkqqkmDwyw4OcXmhf+1sUry8DZsZot9LMuq1FFW6/vV/8XDonXroDwd3OfCOVCS+AAAAAElFTkSuQmCC" />
+      <div class="account-id" v-show="state.authcode && !state.editAuthcode">
+        <span>授权码：</span>
+        <span>{{ state.authcode }}</span>
+        <NIcon style="margin: 0 4px; cursor: pointer" @click="editNew">
+          <Edit color="#36ad6a" />
+        </NIcon>
+      </div>
+      <div class="account-id" v-show="!state.authcode || state.editAuthcode">授权码：
+        <NInput ref="newInput" v-model:value="state.newAuthcode" placeholder="填写授权码" @blur="onCodeBlurChange" />
+      </div>
     </div>
     <n-radio-group v-model:value="state.currentUserId" style="width: 100%">
       <div class="xhs-list">
-        <div
-          v-for="account in state.accounts"
-          :key="account.user_id"
-          class="xhs-item"
+        <div v-for="account in state.accounts" :key="account.user_id" class="xhs-item"
           :class="{ active: globalState.currentAccount?.user_id === account.user_id }"
-          @click.stop="checkoutAccount(account)"
-        >
+          @click.stop="checkoutAccount(account)">
           <n-radio style="margin-right: 10px" :value="account.user_id"></n-radio>
           <img class="xhs-avatar" :src="account.images" />
           <div class="xhs-info">
@@ -169,9 +203,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="btn-operate">
-            <NButton text type="primary" size="small" @click="showEditDialog(account)"
-              >编辑</NButton
-            >
+            <NButton text type="primary" size="small" @click="showEditDialog(account)">编辑</NButton>
           </div>
         </div>
       </div>
@@ -192,14 +224,8 @@ onMounted(async () => {
       </NButton>
     </div>
 
-    <NModal
-      v-model:show="state.modalShow"
-      :mask-closable="false"
-      :close-on-esc="false"
-      preset="card"
-      title="操作"
-      style="width: 500px"
-    >
+    <NModal to="body" v-model:show="state.modalShow" :mask-closable="false" :close-on-esc="false" preset="card" title="操作"
+      style="width: 500px">
       <n-form ref="formRef" :label-width="80" :model="form.value" :rules="form.rules">
         <n-form-item v-if="form.value.accountId" label="账号ID" path="value.accountId" required>
           <n-input v-model:value="form.value.accountId" placeholder="可以忽略" :disabled="true" />
@@ -214,13 +240,8 @@ onMounted(async () => {
           <div style="width: 100%; text-align: right">
             <n-space style="justify-content: flex-end">
               <n-button @click="state.modalShow = false">取消</n-button>
-              <n-button
-                :loading="form.loading"
-                type="primary"
-                attr-type="button"
-                @click="handleValidateClick"
-                >验证</n-button
-              >
+              <n-button :loading="form.loading" type="primary" attr-type="button"
+                @click="handleValidateClick">验证</n-button>
             </n-space>
           </div>
         </n-form-item>
@@ -252,6 +273,10 @@ onMounted(async () => {
   }
 
   .account-id {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
     padding: 10px 0;
     color: #fff;
     font-weight: normal;
