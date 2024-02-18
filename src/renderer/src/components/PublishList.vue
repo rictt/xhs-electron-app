@@ -5,6 +5,19 @@ import { RefreshSharp } from '@vicons/ionicons5'
 import { IpcChannel } from '@shared/ipc'
 import ImageList from './ImageList.vue'
 import { requireNativeImage } from '@renderer/utils'
+import { toRaw } from 'vue'
+import { Invoke } from '@renderer/utils/ipcRenderer'
+
+const removePublish = async (row) => {
+  // state.tableData = state.tableData.filter(e => e.)
+  await Invoke(IpcChannel.RemovePublish, toRaw(row))
+  await getList()
+}
+
+const editPublish = async (row) => {
+  const data = { ...row }
+  delete data.id
+}
 
 const createColumns = () => {
   return [
@@ -44,6 +57,23 @@ const createColumns = () => {
       render: (row) => {
         return new Date(row.create_time).toLocaleString()
       }
+    },
+    {
+      title: '操作',
+      key: 'operator',
+      width: 140,
+      render: (row: NoteDataItem) => {
+        // <NButton size="small" text type="primary" onClick={() => editPublish(row)}>
+        //   编辑
+        // </NButton>
+        return (
+          <>
+            <NButton size="small" text type="error" onClick={() => removePublish(row)}>
+              删除
+            </NButton>
+          </>
+        )
+      }
     }
   ] as DataTableColumn[]
 }
@@ -63,7 +93,7 @@ const goSync = async () => {
 const getList = async () => {
   try {
     state.loading = true
-    const list = await window.electron.ipcRenderer.invoke(IpcChannel.GetArticleList)
+    const list = await Invoke(IpcChannel.GetArticleList)
     console.log('list: ', list)
     state.tableData = list.sort((a, b) => b.create_time - a.create_time)
   } finally {
@@ -80,7 +110,7 @@ onMounted(() => {
   <n-spin :show="state.loading">
     <div class="table-header">
       <div class="query-wrapper"></div>
-      <div class="btn-wrapper" style="margin-bottom: 10px;">
+      <div class="btn-wrapper" style="margin-bottom: 10px">
         <n-button type="primary" size="small" @click="goSync">
           <template #icon>
             <RefreshSharp />
@@ -91,7 +121,7 @@ onMounted(() => {
     </div>
     <n-data-table
       bordered
-      max-height="800"
+      max-height="600"
       :columns="state.tableColumns"
       :data="state.tableData"
       :pagination="state.pagination"

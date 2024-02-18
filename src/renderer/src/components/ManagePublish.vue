@@ -5,7 +5,7 @@ import Publish from './Publish.vue'
 import { reactive } from 'vue';
 
 const state = reactive({
-  activeTab: 'new'
+  activeTab: 'list'
 })
 
 const onChangeTab = (name: string) => {

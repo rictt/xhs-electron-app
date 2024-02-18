@@ -2,9 +2,15 @@ declare type TestType = {
   name: string
 }
 
+declare type CookieStatus = 'empty' | 'normal' | 'invalid'
+
 declare interface XhsAccount {
   baseCookie: string
   creatorCookie: string
+
+  baseStatus?: CookieStatus
+  creatorStatus?: CookieStatus
+
   guest: boolean
   red_id: string
   user_id: string
@@ -35,6 +41,7 @@ declare interface CommentDataItem {
 }
 
 declare interface ArticleDataItem {
+  id: string
   user_id: string
   title: string
   desc: string
@@ -53,6 +60,20 @@ declare interface CreateNewsForm {
   isPublic: boolean
 }
 
+declare interface CreateNoteForm {
+  account: XhsAccount
+  title: string
+  desc: string
+  pictures: string[]
+  isPublic: boolean
+}
+
+declare interface PublishResult {
+  account: XhsAccount
+  success: boolean
+  message: string
+}
+declare type PublishResultList = PublishResult[]
 declare interface PublishOptions {
   pictures: string[]
   title: string

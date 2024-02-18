@@ -27,9 +27,13 @@ export const enum IpcChannel {
 
   NewNotes = 'NewNotes',
 
+  NewNote = 'NewNote',
+
   Auth = 'Auth',
 
-  SetAuthCode = 'SetAuthCode'
+  SetAuthCode = 'SetAuthCode',
+
+  RemovePublish = 'RemovePublish'
 }
 
 export type IpcMainEventList = {
@@ -39,5 +43,5 @@ export type IpcMainEventList = {
 export const AuthList: string[] = [
   IpcChannel.GetNoteList,
   IpcChannel.StartNoteMonitor,
-  IpcChannel.NewNotes
+  IpcChannel.NewNote
 ]

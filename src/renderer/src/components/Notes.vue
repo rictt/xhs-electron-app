@@ -95,12 +95,12 @@ const createColumns = () => {
         return (
           <>
             {row.status === 'idle' ? (
-              <NButton type="primary" onClick={() => monitorNote(row)}>
+              <NButton size="small" type="primary" onClick={() => monitorNote(row)}>
                 自动回复
               </NButton>
             ) : null}
             {row.status === 'monitor' ? (
-              <NButton onClick={() => cancelMonitorNote(row)}>取消自动回复</NButton>
+              <NButton size="small" onClick={() => cancelMonitorNote(row)}>取消自动回复</NButton>
             ) : null}
           </>
         )
@@ -155,9 +155,11 @@ const monitorNote = async (row: NoteDataItem) => {
 }
 
 const cancelMonitorNote = async (row: NoteDataItem) => {
-  if (!row.monitor_id) {
-    await Invoke(IpcChannel.CancelNoteMonitor, row.monitor_id)
+  console.log('cancel: ', row)
+  if (row.monitor_id) {
+    await Invoke(IpcChannel.CancelNoteMonitor, row.monitor_id, row.note_id)
   }
+  row.monitor_id = ''
   row.status = 'idle'
 }
 
@@ -183,7 +185,7 @@ onMounted(() => {
     </div>
     <n-data-table
       bordered
-      max-height="800"
+      max-height="900"
       :columns="state.tableColumns"
       :data="state.tableData"
       :pagination="state.pagination"

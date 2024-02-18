@@ -50,11 +50,11 @@ const form = reactive({
       message: '不能为空',
       trigger: 'blur'
     },
-    creatorCookie: {
-      required: true,
-      message: '不能为空',
-      trigger: 'blur'
-    }
+    // creatorCookie: {
+    //   required: true,
+    //   message: '不能为空',
+    //   trigger: 'blur'
+    // }
   }
 })
 
@@ -159,6 +159,7 @@ const onCodeBlurChange = async () => {
     state.newAuthcode = ''
     setAuthCode(state.authcode)
     await Invoke(IpcChannel.SetAuthCode, state.authcode)
+    window.location.reload()
   }
 }
 
@@ -198,8 +199,9 @@ onMounted(async () => {
           <div class="xhs-info">
             <div class="info-nickname">{{ account.nickname }}</div>
             <div class="info-status">
-              <div class="status normal-status">账号正常</div>
-              <div class="status unnormal-status">已离线</div>
+              <!-- <div class="status normal-status">账号正常</div>
+              <div v-if="account.creatorStatus === 'invalid'" class="status unnormal-status">发布异常</div>
+              <div v-else class="status normal-status">发布正常</div> -->
             </div>
           </div>
           <div class="btn-operate">

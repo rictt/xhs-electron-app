@@ -88,7 +88,7 @@ export class Xhs extends EventEmitter {
             const msg = (json?.msg ?? '') as string
             const isExpired = msg.indexOf('过期') !== -1 || msg.indexOf('无登录') !== -1
             if (isExpired) {
-              console.log('登录信息已过期')
+              console.log('登录信息已过期', msg)
             } else {
               console.log('request failed, url is: ', url + ' response was: ', json)
             }
@@ -462,7 +462,10 @@ export class Xhs extends EventEmitter {
 
   async publicPicText(options: PublishOptions) {
     return new Promise(async (resolve, reject) => {
+      let internalTimer = null
       let timer = setTimeout(() => {
+        clearTimeout(timer)
+        clearTimeout(internalTimer)
         reject('发布超时')
       }, 1000 * 3000)
       this.on('publish:success', () => {
@@ -473,6 +476,14 @@ export class Xhs extends EventEmitter {
       const { pictures, title, desc, isPublic } = options
       await this.page.goto('https://creator.xiaohongshu.com/publish/publish')
       await this.timeout()
+      try {
+        await this.page.waitForSelector('.login-box-container', { timeout: 1000 * 10 })
+        reject('创作者账号已过期，需重新登录')
+        console.log('创作者账号已过期，需重新登录')
+        return
+      } catch (error) {
+        console.log('creator cookie正常登录')
+      }
       await this.page.waitForSelector('.header .tab:nth-child(2)')
       await this.page.$eval('.header .tab:nth-child(2)', (el: HTMLElement) => {
         el.click()
@@ -480,7 +491,8 @@ export class Xhs extends EventEmitter {
       const uploadInput = await this.page.waitForSelector('.upload-input')
       for (let i = 0; i < pictures.length; i++) {
         // @ts-ignore: 11
-        await uploadInput.uploadFile(pictures[i])
+        const result = await uploadInput.uploadFile(pictures[i])
+        console.log('upload result: ', result)
       }
       await this.timeout()
       await this.page.waitForSelector('.c-input_inner')
@@ -497,16 +509,18 @@ export class Xhs extends EventEmitter {
           const checkFunction = async () => {
             const masks = await this.page.$$('.img-container .mask')
             const masksClass = await this.page.$$eval('.img-container .mask', (nodes) => {
-              return nodes.map((e) => e.className)
+              return nodes.map((e) => e.className.split(' ')).flat(10)
             })
+            console.log('mask class: ', masksClass)
             const flag1 = masks.length === pictures.length
             const flag2 = !masksClass.includes('uploading')
             const flag3 = !masksClass.includes('failed')
-            if (flag1 && flag2 && flag3) {
+            const flag4 = !masksClass.includes('prerender')
+            if (flag1 && flag2 && flag3 && flag4) {
               console.log('call!')
               resolve('')
             } else {
-              setTimeout(async () => {
+              internalTimer = setTimeout(async () => {
                 await checkFunction()
               }, 1000)
             }

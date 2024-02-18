@@ -1,6 +1,7 @@
 // export let authcode = '465D73BE16E2'
 export let authcode = ''
-export const authHost = `http://localhost:3000`
+// export const authHost = `http://localhost:3000`
+export const authHost = `https://zikao365.online/api`
 
 export const setCode = (code: string) => {
   authcode = code || ''

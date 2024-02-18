@@ -125,8 +125,8 @@ export const listeners = {
     const monitorId = await xhs.createMonitorId(note_id)
     xhs.monitorAutoReplyComment(note_id, reply_text)
     await systemDb.db.read()
+    await systemDb.updateNote(note_id, 'monitor_id', monitorId)
     await systemDb.updateNote(note_id, 'status', 'monitor')
-    console.log('开启监听')
     return monitorId
   },
 
@@ -139,6 +139,7 @@ export const listeners = {
     if (instance) {
       instance.stopMonitor()
     }
+    await systemDb.updateNote(note_id, 'monitor_id', '')
     await systemDb.updateNote(note_id, 'status', 'idle')
     return true
   },
@@ -158,41 +159,57 @@ export const listeners = {
 
   // 创建新的笔记
   // 根据传进来的参数，挨个打开账号，输入文本，标题，图片，然后发送
-  [IpcChannel.NewNotes]: async (_event: IpcMainEvent, params: CreateNewsForm) => {
+  [IpcChannel.NewNote]: async (_event, params: CreateNoteForm) => {
     console.log('params: ', params)
-
-    const { accounts, title, desc, pictures, isPublic } = params
-    for (let i = 0; i < accounts.length; i++) {
-      const xhsInstance = await getXhsInstance({
-        ...accounts[i]
-      })
-      await xhsInstance
-        .publicPicText({
-          title,
-          desc,
-          pictures,
-          isPublic
-        })
-        .catch((error) => {
-          console.log(error)
-        })
-      await xhsInstance.page.close()
-      await removeXhsInstances(xhsInstance)
-      await systemDb.db.read()
-      const articles = systemDb.data.articles || []
-      articles.push({
+    const { account, title, desc, pictures, isPublic } = params
+    const xhsInstance = await getXhsInstance({
+      ...account
+    })
+    const result: PublishResult = {
+      account,
+      message: '',
+      success: false
+    }
+    try {
+      await xhsInstance.publicPicText({
         title,
         desc,
         pictures,
-        user_id: accounts[i].user_id,
-        account: accounts[i],
+        isPublic
+      })
+      result.success = true
+      await systemDb.db.read()
+      const articles = systemDb.data.articles || []
+      articles.push({
+        id: Date.now() + '',
+        title,
+        desc,
+        pictures,
+        user_id: account.user_id,
+        account: account,
         create_time: Date.now()
       })
       systemDb.data.articles = articles
       await systemDb.db.write()
+    } catch (error) {
+      result.success = false
+      result.message = error || '发布失败'
     }
+    await xhsInstance.page.close()
+    await removeXhsInstances(xhsInstance)
+    return result
+  },
 
-    return true
+  [IpcChannel.RemovePublish]: async (_event, row: ArticleDataItem) => {
+    const { id, user_id, title } = row
+    if (id) {
+      systemDb.data.articles = systemDb.data.articles.filter((e) => e.id !== id)
+    } else {
+      systemDb.data.articles = systemDb.data.articles.filter(
+        (e) => e.user_id !== user_id && e.title !== title
+      )
+    }
+    await systemDb.db.write()
   }
 }
 
@@ -201,11 +218,14 @@ export const registerIpcMainEvent = () => {
     const [name, handler] = item
     if (AuthList.includes(name)) {
       ipcMain.handle(name, async (event: IpcMainEvent, ...rest) => {
+        let flag = false
         try {
-          await Auth()
-          return await handler(event, ...rest)
+          flag = await Auth()
         } catch (error) {
-          console.log('鉴权失败: ', name)
+          console.log('鉴权失败: ', name, error)
+        }
+        if (flag) {
+          return await handler(event, ...rest)
         }
       })
     } else {

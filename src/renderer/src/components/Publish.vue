@@ -11,9 +11,13 @@ import {
   NRadio,
   FormInst,
   useMessage,
-  FormRules
+  FormRules,
+  NCard,
+  NStep,
+  NSteps
 } from 'naive-ui'
-import { onMounted, reactive, ref, toRaw } from 'vue'
+import PublishForm from './PublishForm.vue'
+import { Component, VueElement, onMounted, reactive, ref, toRaw } from 'vue'
 import { globalState } from '@renderer/store'
 import { IpcChannel } from '@shared/ipc'
 import ImageList from './ImageList.vue'
@@ -21,31 +25,12 @@ import { requireNativeImage, replaceNativeImageScheme } from '@renderer/utils'
 import type { OpenDialogOptions } from 'electron'
 import { Invoke } from '@renderer/utils/ipcRenderer'
 
-const rules = reactive<FormRules>({
-  title: {
-    required: true,
-    message: '请输入标题',
-    trigger: 'blur'
-  },
-  desc: {
-    required: true,
-    message: '请输入描述',
-    trigger: ['input', 'blur']
-  },
-  accounts: {
-    required: true,
-    type: 'array',
-    message: '请选择账号',
-    trigger: ['input', 'blur']
-  },
-  pictures: {
-    required: true,
-    type: 'array',
-    message: '请选择图片',
-    trigger: ['input', 'blur']
-  }
-})
 const emits = defineEmits(['change-tab'])
+const state = reactive({
+  step: 1,
+  batchList: [],
+  loading: false
+})
 const formValue = reactive({
   title: '',
   desc: '',
@@ -55,52 +40,63 @@ const formValue = reactive({
   isPublic: true
 })
 const message = useMessage()
-const formRef = ref<FormInst | null>(null)
+const formRef = ref<InstanceType<typeof PublishForm>[] | []>([])
+const batchFormRef = ref<InstanceType<typeof PublishForm>>(null)
 
 const handleValidateClick = async (e: MouseEvent) => {
   e.preventDefault()
-  formRef.value?.validate(async (errors) => {
-    console.log(formValue)
-    if (errors) {
-      console.log(errors)
-      message.error('Invalid')
-      return
-    }
-    console.log(formValue)
-    const accounts = formValue.accounts
-      .map((e) => {
-        return globalState.accountList.find((acc) => acc.user_id === e)
+  console.log(formRef.value)
+  await Promise.all(formRef.value.map((e) => e.validate()))
+  const formList = formRef.value.map((e) => e.getFormValue())
+  console.log('formList: ', formList)
+
+  state.loading = true
+  const list = [...formList]
+  let allSuccess = true
+  for (let i = 0; i < list.length; i++) {
+    const params: CreateNoteForm = list[i]
+    params.pictures = params.pictures.map((e) => replaceNativeImageScheme(e))
+    try {
+      const result: PublishResult = await Invoke(IpcChannel.NewNote, params)
+      console.log('result: ', result)
+      if (result.success) {
+        state.batchList.splice(i, 1)
+        message.success(`【${params.account.nickname}】发布成功`)
+      } else {
+        allSuccess = false
+        message.error(`【${params.account.nickname}】发布失败：${result.message}`, {
+          closable: true,
+          duration: 0
+        })
+      }
+    } catch (error) {
+      allSuccess = false
+      console.log(error)
+      message.error(`【${params.account.nickname}】发布失败：${error}`, {
+        closable: true,
+        duration: 0
       })
-      .filter((e) => e)
-      .map((e) => toRaw(e))
-
-    await Invoke(IpcChannel.NewNotes, {
-      accounts: accounts,
-      title: formValue.title,
-      desc: formValue.desc,
-      pictures: formValue.pictures.map((e) => replaceNativeImageScheme(e)),
-      isPublic: !!formValue.isPublic
-    } as CreateNewsForm)
-    console.log('发布成功')
-    message.success('发布成功')
-    emits('change-tab', 'list')
-  })
-}
-
-const selectImgFiles = async () => {
-  const filePaths = await Invoke(IpcChannel.ShowOpenDialogSync, {
-    title: '选择图片',
-    filters: [{ name: 'Images', extensions: ['jpg', 'png', 'jpeg'] }],
-    properties: ['openFile', 'multiSelections']
-  } as OpenDialogOptions)
-  if (filePaths && filePaths.length) {
-    console.log('filePaths: ', filePaths)
-
-    const nativeImages = filePaths.map((e) => {
-      return requireNativeImage(e)
-    })
-    formValue.pictures = [...formValue.pictures, ...nativeImages]
+    }
   }
+  if (allSuccess) {
+    state.step = 1
+    emits('change-tab', 'list')
+  }
+  state.loading = false
+  return
+}
+const goPrev = () => {
+  state.step--
+  state.loading = false
+}
+const goNext = () => {
+  console.log(batchFormRef.value.validate)
+  batchFormRef.value.validate().then(() => {
+    const batchList = batchFormRef.value.createFormList()
+    console.log('batch List: ', batchList)
+    state.step++
+    state.batchList = batchList
+  })
 }
 
 onMounted(async () => {
@@ -109,49 +105,37 @@ onMounted(async () => {
 </script>
 
 <template>
-  <n-form ref="formRef" label-placement="left" :label-width="100" :model="formValue" :rules="rules">
-    <n-form-item label="标题" path="title">
-      <n-input v-model:value="formValue.title" placeholder="输入标题" />
-    </n-form-item>
-    <n-form-item label="描述" path="desc">
-      <n-input v-model:value="formValue.desc" type="textarea" placeholder="输入描述" />
-    </n-form-item>
+  <n-steps style="padding: 0 10px" :current="state.step">
+    <n-step title="批量设置" />
+    <n-step title="发布优化" />
+    <n-step title="发布" />
+  </n-steps>
 
-    <n-form-item label="图片" path="pictures">
-      <div style="">
-        <ImageList v-model:model-value="formValue.pictures" style="margin-bottom: 10px" />
-        <NButton @click="selectImgFiles">点击上传</NButton>
-      </div>
-    </n-form-item>
+  <br />
 
-    <n-form-item label="权限设置" path="isPublic" required>
-      <n-radio-group v-model:value="formValue.isPublic" name="radiogroup">
-        <n-space>
-          <n-radio :value="true">公开（所有人可见）</n-radio>
-          <n-radio :value="false">私密（仅自己可见）</n-radio>
-        </n-space>
-      </n-radio-group>
-    </n-form-item>
+  <PublishForm v-show="state.step === 1" ref="batchFormRef" :is-batch="true" />
+  <n-space v-if="state.step === 2" vertical>
+    <n-card
+      v-for="(item, index) in state.batchList"
+      :key="index"
+      :title="`账号：${item.account.nickname}`"
+    >
+      <PublishForm ref="formRef" :form="item" :user-id="item.account.user_id" />
+    </n-card>
+  </n-space>
 
-    <n-form-item label="发布账号" path="accounts">
-      <n-checkbox-group v-model:value="formValue.accounts">
-        <n-space>
-          <n-checkbox
-            v-for="item in globalState.accountList"
-            :key="item.user_id"
-            :value="item.user_id"
-            >{{ item.nickname }}</n-checkbox
-          >
-        </n-space>
-      </n-checkbox-group>
-    </n-form-item>
-
-    <n-form-item>
-      <div style="width: 100%; display: flex; justify-content: center">
-        <n-button attr-type="button" type="primary" @click="handleValidateClick">保存</n-button>
-      </div>
-    </n-form-item>
-  </n-form>
+  <div style="width: 100%; display: flex; justify-content: center; margin: 20px 0">
+    <n-button v-if="state.step === 2" @click="goPrev">上一步</n-button>
+    <n-button v-if="state.step === 1" type="primary" @click="goNext">下一步</n-button>
+    <n-button
+      v-if="state.step === 2"
+      type="primary"
+      style="margin: 0 10px"
+      :loading="state.loading"
+      @click="handleValidateClick"
+      >发布</n-button
+    >
+  </div>
 </template>
 
 <style lang="less" scoped></style>

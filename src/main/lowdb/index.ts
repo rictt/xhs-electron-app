@@ -79,9 +79,12 @@ class SystemDB {
   async updateNote(id: string, key: string, value: any) {
     const target = this.db.data.notes.find((e) => e.note_id === id)
     if (target) {
+      console.log('write: ', key, value)
       target[key] = value
     }
+    this.db.data.notes = [...this.db.data.notes]
     await this.db.write()
+    console.log(this.db.data.notes[this.db.data.notes.length - 1])
   }
 }
 
