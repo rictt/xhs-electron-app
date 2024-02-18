@@ -15,17 +15,12 @@ export default defineConfig({
       rollupOptions: {
         output: {
           manualChunks: {
-            vendor: ['puppeteer']
+            core: ['puppeteer']
           }
         }
       }
     },
-    plugins: [
-      externalizeDepsPlugin(),
-      bytecodePlugin({
-        transformArrowFunctions: false
-      })
-    ]
+    plugins: [externalizeDepsPlugin()]
   },
   preload: {
     plugins: [externalizeDepsPlugin()]

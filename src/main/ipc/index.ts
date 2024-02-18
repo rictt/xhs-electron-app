@@ -217,6 +217,7 @@ export const registerIpcMainEvent = () => {
   Object.entries(listeners).forEach((item) => {
     const [name, handler] = item
     if (AuthList.includes(name)) {
+      // @ts-ignore: 11
       ipcMain.handle(name, async (event: IpcMainEvent, ...rest) => {
         let flag = false
         try {
@@ -225,6 +226,7 @@ export const registerIpcMainEvent = () => {
           console.log('鉴权失败: ', name, error)
         }
         if (flag) {
+          // @ts-ignore: 11
           return await handler(event, ...rest)
         }
       })

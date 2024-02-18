@@ -149,6 +149,7 @@ const editNew = () => {
   state.editAuthcode = true
   console.log(newInput.value)
   setTimeout(() => {
+    // @ts-ignore: 11
     newInput.value.focus()
   })
 }
