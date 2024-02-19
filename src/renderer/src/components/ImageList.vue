@@ -3,7 +3,7 @@ import { NImageGroup, NSpace, NImage, NIcon } from 'naive-ui'
 import { Close, Eye } from '@vicons/ionicons5'
 import { watch, ref } from 'vue'
 
-const props = defineProps<{ modelValue: string[] }>()
+const props = defineProps<{ modelValue: string[]; remove?: boolean }>()
 const emits = defineEmits(['update:modelValue'])
 const imgList = ref<string[]>([])
 
@@ -32,10 +32,10 @@ const clearItem = (index) => {
     <n-space>
       <div v-for="(item, index) in imgList" :key="item" class="image-wrapper">
         <n-image width="100" :src="item" />
-        <div class="operation">
-          <NIcon>
+        <div v-if="$props.remove" class="operation">
+          <!-- <NIcon>
             <Eye />
-          </NIcon>
+          </NIcon> -->
           <NIcon @click="clearItem(index)">
             <Close />
           </NIcon>

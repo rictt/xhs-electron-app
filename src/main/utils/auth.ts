@@ -15,7 +15,6 @@ export async function authCheck() {
     const url = `${authHost}/authcode/valid/${authcode}`
     const response = await fetch(url, { method: 'POST' })
     const result = await response.json()
-    console.log(result)
     if (result?.data) {
       return true
     }

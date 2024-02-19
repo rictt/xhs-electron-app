@@ -9,6 +9,8 @@ export const enum IpcChannel {
 
   UpdateAccount = 'UpdateAccount',
 
+  RemoveAccount = 'RemoveAccount',
+
   GetAccountList = 'GetAccountList',
 
   GetNoteList = 'GetNoteList',

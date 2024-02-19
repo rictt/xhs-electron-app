@@ -20,7 +20,6 @@ export const listeners = {
   },
 
   [IpcChannel.ValidXhsCookie]: async (_event: IpcMainEvent, args: any) => {
-    console.log(args)
     const { baseCookie, creatorCookie } = args
     const xhs = await getXhsInstance({ baseCookie, creatorCookie })
     try {
@@ -38,6 +37,16 @@ export const listeners = {
   [IpcChannel.AddAccount]: async (_event: IpcMainEvent, user: any) => {
     try {
       await systemDb.addAccount(user)
+    } catch (error) {
+      return false
+    }
+    return true
+  },
+
+  [IpcChannel.RemoveAccount]: async (_event: IpcMainEvent, user_id: string) => {
+    try {
+      systemDb.data.accounts = systemDb.data.accounts.filter((e) => e.user_id !== user_id)
+      await systemDb.db.write()
     } catch (error) {
       return false
     }
@@ -78,6 +87,7 @@ export const listeners = {
           creatorCookie: account.creatorCookie,
           user_id: account.user_id
         })
+        await xhs.validCookie()
         // return await xhs.getNoteCommentsByNoteId(account.user_id)
         const newNotes = await xhs.getOwnNotes()
         console.log('new notes: ', newNotes.length)
@@ -94,7 +104,8 @@ export const listeners = {
       } catch (error) {
         log.error('get Note list error: ', error)
         console.log('GetNoteList error: ', error)
-        return []
+        // return []
+        throw error
       }
     } else {
       await systemDb.db.read()
@@ -122,6 +133,7 @@ export const listeners = {
       baseCookie: account.baseCookie,
       creatorCookie: account.creatorCookie
     })
+    await xhs.validCookie()
     const monitorId = await xhs.createMonitorId(note_id)
     xhs.monitorAutoReplyComment(note_id, reply_text)
     await systemDb.db.read()
@@ -216,22 +228,31 @@ export const listeners = {
 export const registerIpcMainEvent = () => {
   Object.entries(listeners).forEach((item) => {
     const [name, handler] = item
-    if (AuthList.includes(name)) {
-      // @ts-ignore: 11
-      ipcMain.handle(name, async (event: IpcMainEvent, ...rest) => {
-        let flag = false
+    ipcMain.handle(name, async (event: IpcMainEvent, ...rest) => {
+      let isAuth = true
+      if (AuthList.includes(name)) {
         try {
-          flag = await Auth()
+          isAuth = await Auth()
         } catch (error) {
+          isAuth = false
           console.log('鉴权失败: ', name, error)
         }
-        if (flag) {
+      }
+      const response = {
+        data: null,
+        message: '',
+        success: isAuth
+      }
+      if (isAuth) {
+        try {
           // @ts-ignore: 11
-          return await handler(event, ...rest)
+          response.data = await handler(event, ...rest)
+        } catch (error) {
+          response.success = false
+          response.message = error
         }
-      })
-    } else {
-      ipcMain.handle(name, handler)
-    }
+      }
+      return response
+    })
   })
 }

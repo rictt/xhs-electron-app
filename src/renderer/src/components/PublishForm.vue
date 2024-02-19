@@ -143,7 +143,11 @@ defineExpose({
 
     <n-form-item label="图片" path="pictures">
       <div style="">
-        <ImageList v-model:model-value="formValue.pictures" style="margin-bottom: 10px" />
+        <ImageList
+          v-model:model-value="formValue.pictures"
+          :remove="props.isBatch"
+          style="margin-bottom: 10px"
+        />
         <NButton @click="selectImgFiles">点击上传</NButton>
       </div>
     </n-form-item>

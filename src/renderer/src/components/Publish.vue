@@ -116,8 +116,8 @@ onMounted(async () => {
   <PublishForm v-show="state.step === 1" ref="batchFormRef" :is-batch="true" />
   <n-space v-if="state.step === 2" vertical>
     <n-card
-      v-for="(item, index) in state.batchList"
-      :key="index"
+      v-for="item in state.batchList"
+      :key="item.account.user_id"
       :title="`账号：${item.account.nickname}`"
     >
       <PublishForm ref="formRef" :form="item" :user-id="item.account.user_id" />

@@ -39,8 +39,11 @@ const createColumns = () => {
       title: '图片',
       key: 'pictures',
       render: (row) => {
-        // return <ImageList value={row.pictures} />
-        return <ImageList model-value={row.pictures?.map((e) => requireNativeImage(e))} />
+        return (
+          <div style="max-height: 100px; overflow: hidden;">
+            <ImageList model-value={row.pictures?.map((e) => requireNativeImage(e))} />
+          </div>
+        )
       }
     },
     {

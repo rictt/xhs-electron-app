@@ -129,9 +129,10 @@ const fetchAccountNotes = async (account: XhsAccount, sync: boolean = false) => 
     return
   }
   try {
-    const notes = await Invoke(IpcChannel.GetNoteList, toRaw(account), sync)
     state.loading = true
+    const notes = await Invoke(IpcChannel.GetNoteList, toRaw(account), sync)
     console.log('notes: ', notes)
+    sync && message.success('同步成功')
     state.tableData = notes || []
   } catch (error) {
     console.log(error)
@@ -147,11 +148,17 @@ const monitorNote = async (row: NoteDataItem) => {
     message.error('笔记Id、回复文本不能为空')
     return
   }
-  console.log('monitor ', note_id)
-  const monitorId = await Invoke(IpcChannel.StartNoteMonitor, toRaw(account), note_id, reply_text)
-  // state.monitorId = monitorId
-  row.monitor_id = monitorId
-  row.status = 'monitor'
+  if (state.loading) {
+    return
+  }
+  try {
+    state.loading = true
+    const monitorId = await Invoke(IpcChannel.StartNoteMonitor, toRaw(account), note_id, reply_text)
+    row.monitor_id = monitorId
+    row.status = 'monitor'
+  } finally {
+    state.loading = false
+  }
 }
 
 const cancelMonitorNote = async (row: NoteDataItem) => {

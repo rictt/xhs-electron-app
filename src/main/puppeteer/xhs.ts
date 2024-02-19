@@ -89,6 +89,7 @@ export class Xhs extends EventEmitter {
             const isExpired = msg.indexOf('过期') !== -1 || msg.indexOf('无登录') !== -1
             if (isExpired) {
               console.log('登录信息已过期', msg)
+              this.emit('meResponse', { guest: true })
             } else {
               console.log('request failed, url is: ', url + ' response was: ', json)
             }
@@ -117,8 +118,8 @@ export class Xhs extends EventEmitter {
         clearTimeout(timer)
         timer = null
         console.log('me response: ', data)
-        if (data.guest) {
-          reject('guest')
+        if (!data || data.guest) {
+          reject('登录信息已过期')
         } else {
           resolve(data)
         }
@@ -489,9 +490,15 @@ export class Xhs extends EventEmitter {
         el.click()
       })
       const uploadInput = await this.page.waitForSelector('.upload-input')
-      for (let i = 0; i < pictures.length; i++) {
+      const indexPic = pictures[0]
+      const otherPics = pictures.slice(1)
+      // @ts-ignore: 11
+      await uploadInput.uploadFile(indexPic)
+      const moreUploadInput = await this.page.waitForSelector('.img-list .top input[type="file"]')
+      console.log(moreUploadInput)
+      for (let i = 0; i < otherPics.length; i++) {
         // @ts-ignore: 11
-        const result = await uploadInput.uploadFile(pictures[i])
+        const result = await moreUploadInput.uploadFile(otherPics[i])
         console.log('upload result: ', result)
       }
       await this.timeout()

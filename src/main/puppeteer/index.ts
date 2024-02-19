@@ -37,7 +37,7 @@ export async function getXhsInstance(params: GetInstanceParams) {
     __browser = await launch({
       defaultViewport: null,
       devtools: false,
-      headless: !!isDev
+      headless: !isDev
     })
   }
   const browser = __browser

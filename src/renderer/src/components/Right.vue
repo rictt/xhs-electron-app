@@ -1,33 +1,16 @@
 <script setup>
-import { NCard, NResult, NTabs, NTabPane, NIcon } from 'naive-ui'
-import { reactive, watch } from 'vue'
-import { CloseSharp } from '@vicons/ionicons5'
-import Notes from './Notes.vue'
+import { NCard, NResult, NButton } from 'naive-ui'
+import { PersonAddOutline } from '@vicons/ionicons5'
 import { globalState } from '@renderer/store'
 import AccountPanel from './AccountPanel.vue'
 import ManagePublish from './ManagePublish.vue'
 
-const state = reactive({
-  tabs: [
-    { name: 'Notes', label: '笔记列表' },
-    { name: 'Fans', label: '粉丝列表' },
-    { name: 'CareList', label: '我关注的' }
-  ],
-  currentTab: 'Notes'
-})
-
-const components = {
-  Notes: Notes
-}
-
-const unActiveComponent = () => {
-  globalState.activeComponetName = ''
-}
+defineEmits(['add-account'])
 </script>
 
 <template>
   <div id="right-container" class="right-container">
-    <n-card class="right-card-wrapper" style="margin-bottom: 16px; height: 100%; padding: 10px;">
+    <n-card class="right-card-wrapper" style="margin-bottom: 16px; height: 100%; padding: 10px">
       <KeepAlive v-for="account in globalState.accountList" :key="account.user_id">
         <AccountPanel
           v-show="globalState.currentAccount?.user_id === account.user_id"
@@ -35,14 +18,30 @@ const unActiveComponent = () => {
           :account="account"
         />
       </KeepAlive>
+      <div
+        v-if="!globalState.currentAccount && !globalState.activeComponetName"
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          display: flex;
+        "
+      >
+        <n-result status="404" title="请先选择账号" description="请先选择/添加账号～">
+          <template #footer>
+            <n-button type="primary" @click="$emit('add-account')">
+              立即添加
+              <template #icon>
+                <PersonAddOutline />
+              </template>
+            </n-button>
+          </template>
+        </n-result>
+      </div>
     </n-card>
 
-    <div class="sys-scrollbar other-content" v-show="globalState.activeComponetName">
-      <!-- <div class="content-header">
-        <NIcon @click="unActiveComponent">
-          <CloseSharp />
-        </NIcon>
-      </div> -->
+    <div v-show="globalState.activeComponetName" class="sys-scrollbar other-content">
       <div class="content-body">
         <ManagePublish v-show="globalState.activeComponetName === 'Publish'" />
       </div>

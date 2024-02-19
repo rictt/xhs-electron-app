@@ -10,6 +10,7 @@ import {
   NInput,
   NIcon,
   NModal,
+  NPopconfirm,
   useMessage
 } from 'naive-ui'
 import { AddSharp, PersonAddOutline } from '@vicons/ionicons5'
@@ -73,13 +74,12 @@ const handleValidateClick = () => {
     }
     console.log(form.value)
     form.loading = true
-    const data = await window.electron.ipcRenderer
-      .invoke(IpcChannel.ValidXhsCookie, {
-        ...form.value
-      })
+    const data = await Invoke(IpcChannel.ValidXhsCookie, {
+      ...form.value
+    })
       .catch((error) => {
         console.log('error or: ', error)
-        message.error('校验失败，请联系客服\n' + JSON.stringify(error))
+        message.error('校验失败，请联系客服')
       })
       .finally(() => {
         form.loading = false
@@ -89,7 +89,7 @@ const handleValidateClick = () => {
       form.loading = true
       try {
         const action = form.value.accountId ? IpcChannel.UpdateAccount : IpcChannel.AddAccount
-        await window.electron.ipcRenderer.invoke(action, {
+        await Invoke(action, {
           ...data,
           user_id: data.user_id || form.value.accountId || '',
           baseCookie: form.value.baseCookie,
@@ -140,7 +140,7 @@ const checkoutAccount = (account: XhsAccount) => {
 }
 
 const getAccounts = async () => {
-  return await window.electron.ipcRenderer.invoke(IpcChannel.GetAccountList)
+  return await Invoke(IpcChannel.GetAccountList)
 }
 
 const showManagePublish = () => {
@@ -166,21 +166,33 @@ const onCodeBlurChange = async () => {
   }
 }
 
+const showRemove = async (account: XhsAccount) => {
+  await Invoke(IpcChannel.RemoveAccount, account.user_id)
+  const list = await getAccounts()
+  state.accounts = list
+}
+
 onMounted(async () => {
   const list = await getAccounts()
   state.accounts = list
   globalState.accountList = list
+  if (list?.length) {
+    globalState.currentAccount = list[0]
+    state.currentUserId = list[0].user_id
+  }
   const code = getAuthCode()
   if (code) {
     state.authcode = code
   }
 })
+
+defineExpose({
+  showNewDialog
+})
 </script>
 <template>
   <div class="left-container">
     <div class="account">
-      <!-- <img class="avatar"
-        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMkAAABICAMAAABr9CFKAAAAP1BMVEUAAAD/I0L/JEL/JEH/JED/IED/JEH/JUL/JEL/I0H/IED/I0L/JEH/JUD/JEH/I0L/I0D/JEH/I0P/JEP/JEKyzp5HAAAAFHRSTlMA34BgQB+/n++gEJCwMHCfUM9Qz4ilXboAAAQzSURBVGje1ZrrtqMgDIW5S/HSm+//rLNmbFdNNybUg0zP/nd6DOaTkEBUbSr5lZIq1BRWGtROuXkt9UPZeaVQaqXXVt0vJiFGs/9Ckuu+KflCEl1mcyMeuF9MErYi8j5z6tUiP7O6B+MUle/jPOvO1yRBTyyJOk4dsWeljV/7GB+/3iqTnMHkxySoaDLBHMd6JDgllUhQ2uOooSpJTyxSPRJEQQ9dNRJMwZVJ8DEN659MLRKsikeSzANkyq4WCU7JoSSzeyfpK5HglBxMEt5JLpVIsCoeQkIfVRAdlEnkFHw4yURJbCUSrIqHkwyExNSr8R5cO5hEr0jCs5hczEo3nmTs1kr5KZnjZF/6N5hZFCjB2z3T0+RELjOLek1uoZRbLr74/FrtBBLIUMzTxMVvIJUW7+rxVxTmZSTJuzyChyhXhQRj1EslzfAkKe+KZuK5IUmE/MmseEi25FqUbUlCzC4Cic65GeQpaU/iPiEx4no3LUiYRYwkbHqYmE1FKxI08wLJKZOyT0zN+38k6hOSgR4WUb4VCbocGRL0JWRuDKTtSCZwmSGBq9nC6OqSRJYEnzKSyIA28ClYJjF6pUiHeert1xB6S3j6IhJx8+P/CapsKclp3qe73Rij40hwC5n4o8ABJCjtshXCSE55JjfBDuAQEpTZQQI7ArY0HUeCKPgcRRJuJZwhUA8kQT9gcJ4EwZnIa0USE0NikARfhRhuShqSzAYfpEgy5Dt/MJJrShJhlSaWBJM282ayKck8QqnjSLCQDkwKbksyba9sU/L7lWkMtyXp37aEV5EEyfNdCd0tmhqRdG9DBJnklj8EKLe7I4Htw4E6mdGgsa1GrAaZZNxYV+dDOxIoGykJHMxFEv9RF9IeRqIcSzLJJCrfwJiO7kjIb2wijJ0jEZPt/diOBApWOBRGkeSUC8fETEkjkjOkIolkIhaJI+lUQ5JI/pRI8DYXrqHqWpIYWPASSSL/8Ew5uaqWJB6GlkhUyMaP05iCW5IQv6IqIjEbS3q0hkq1JCFWQxmJK/1AsCkJCRYrkGBFGb+KxEGoSCTmZf5VJEpDqAgkI0ziZfwKkgkGFkhUwDfCMfSTpUoPt+xLAz0dwdUfkQxAkiJ4K3y+cSFTQq4FG68Lv3n4lMRnirpZ+eXtojPcB9a8TopzdsIz5n4SPI/1cD55TopmzhmwtO3W5xRYanRNErNpH15r5wYVnHs5dV1cZZztgLICSYpMR+Jh2cEo7PeSrvKUyCTYo8rvZLXPtbCZCtiXTkldEieZu5GNRa1Qt6IpCVVJcEAMGj4WbekHkPhWuDaJy1vLjUL5izvHhe25Bgnmmnz0o1IRcFFVnOuTTEwvCnQqAuGctUBZjQSDX49FARNNUpx6dkqqkmDwyw4OcXmhf+1sUry8DZsZot9LMuq1FFW6/vV/8XDonXroDwd3OfCOVCS+AAAAAElFTkSuQmCC" /> -->
       <img class="avatar" :src="logo" />
       <h3 style="user-select: none; color: white; margin: 6px 0">xFox助手</h3>
       <div v-show="state.authcode && !state.editAuthcode" class="account-id">
@@ -214,15 +226,22 @@ onMounted(async () => {
           <div class="xhs-info">
             <div class="info-nickname">{{ account.nickname }}</div>
             <div class="info-status">
-              <!-- <div class="status normal-status">账号正常</div>
-              <div v-if="account.creatorStatus === 'invalid'" class="status unnormal-status">发布异常</div>
-              <div v-else class="status normal-status">发布正常</div> -->
             </div>
           </div>
           <div class="btn-operate">
             <NButton text type="primary" size="small" @click="showEditDialog(account)"
               >编辑</NButton
             >
+            <n-popconfirm
+              :negative-text="null"
+              positive-text="确认"
+              @positive-click="showRemove(account)"
+            >
+              <template #trigger>
+                <n-button style="margin: 0 4px" text type="error" size="small">删除</n-button>
+              </template>
+              请确认是否删除该账号
+            </n-popconfirm>
           </div>
         </div>
       </div>
