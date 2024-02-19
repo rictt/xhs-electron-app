@@ -52,8 +52,9 @@ const unActiveComponent = () => {
 
 <style lang="less" scoped>
 .right-container {
-  flex: 1;
   position: relative;
+  z-index: 10;
+  flex: 1;
 }
 
 .right-card-wrapper {

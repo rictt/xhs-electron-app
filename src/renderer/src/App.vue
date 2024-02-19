@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import Left from './components/Left.vue'
-import Right from './components/Right.vue'
 import AppContainer from './components/AppContainer.vue'
 import { NConfigProvider, GlobalThemeOverrides, NMessageProvider } from 'naive-ui'
 
@@ -15,7 +13,6 @@ const themeOverrides: GlobalThemeOverrides = {
     // textColorText: '#ff0000'
   }
 }
-
 </script>
 
 <template>

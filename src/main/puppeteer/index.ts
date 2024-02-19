@@ -3,6 +3,8 @@ import { preloadDetection, getCookies } from '../utils'
 import * as config from '../config'
 import { Xhs } from './xhs'
 
+const isDev = import.meta.env.MODE === 'development'
+
 let __browser: Browser
 // const __xhs: Xhs[] = []
 
@@ -35,7 +37,7 @@ export async function getXhsInstance(params: GetInstanceParams) {
     __browser = await launch({
       defaultViewport: null,
       devtools: false,
-      headless: false
+      headless: !!isDev
     })
   }
   const browser = __browser
