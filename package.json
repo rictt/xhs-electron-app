@@ -50,6 +50,7 @@
     "naive-ui": "^2.37.3",
     "prettier": "^3.1.1",
     "puppeteer": "21",
+    "rollup-plugin-javascript-obfuscator": "^1.0.4",
     "typescript": "^5.3.3",
     "utf-8-validate": "^6.0.3",
     "vfonts": "^0.0.3",
