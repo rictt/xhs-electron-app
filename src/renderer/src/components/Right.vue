@@ -1,9 +1,43 @@
-<script setup>
-import { NCard, NResult, NButton } from 'naive-ui'
+<script setup lang="ts">
+import { NCard, NResult, NButton, NInput, useMessage } from 'naive-ui'
 import { PersonAddOutline } from '@vicons/ionicons5'
 import { globalState } from '@renderer/store'
 import AccountPanel from './AccountPanel.vue'
 import ManagePublish from './ManagePublish.vue'
+import { onMounted, reactive } from 'vue'
+import { Invoke } from '@renderer/utils/ipcRenderer'
+import { getChromePath, setChromePath } from '@renderer/utils/index'
+import { IpcChannel } from '@shared/ipc'
+
+const state = reactive({
+  chromePath: '',
+  loading: false
+})
+
+const message = useMessage()
+
+const updateChromePath = async (showTip = true) => {
+  console.log(state.chromePath)
+  state.loading = true
+  try {
+    await Invoke(IpcChannel.SetChromePath, state.chromePath)
+    setChromePath(state.chromePath)
+    showTip && message.success('设置成功')
+  } catch (error) {
+    console.log(error)
+  } finally {
+    state.loading = false
+  }
+}
+
+onMounted(() => {
+  const value = getChromePath()
+  if (value) {
+    state.chromePath = value
+    updateChromePath(false)
+  }
+  console.log('update chrome path: ', state.chromePath)
+})
 
 defineEmits(['add-account'])
 </script>
@@ -36,6 +70,18 @@ defineEmits(['add-account'])
                 <PersonAddOutline />
               </template>
             </n-button>
+
+            <div style="margin: 30px 0">
+              <p>启动失败时，请手动设置浏览器地址</p>
+              <n-input
+                v-model:value.trim="state.chromePath"
+                style="flex: 1; margin-left: 10px; margin-right: 10px; width: 400px"
+                placeholder="C:\\"
+              />
+              <n-button type="primary" :loading="state.loading" @click="updateChromePath()"
+                >确认</n-button
+              >
+            </div>
           </template>
         </n-result>
       </div>

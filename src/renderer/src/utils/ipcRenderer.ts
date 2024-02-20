@@ -12,10 +12,32 @@ export async function Invoke(channel: string, ...args: any[]) {
   // return window.electron.ipcRenderer.invoke(channel, ...args)
   console.log(data, success, message)
   if (!success) {
-    const msg = message || '系统出错，请联系开发者'
+    const msg = extractErrorMessage(message)
     window.$message.error(msg)
     throw new Error(msg)
   }
 
   return data
+}
+
+export const extractErrorMessage = (message) => {
+  if (!message) {
+    return '系统出错，请联系开发者'
+  }
+
+  if (typeof message === 'object') {
+    console.log(message)
+    console.dir(message)
+    return message?.message || JSON.stringify(message)
+  }
+
+  if (typeof message === 'string') {
+    if (message.indexOf('Failed to launch the browser') !== -1) {
+      return '浏览器启动失败，请联系开发者排查'
+    }
+    if (message.indexOf('Failed to deserialize params.cookies.value') !== -1) {
+      return '请检查cookie格式是否正确'
+    }
+  }
+  return message
 }

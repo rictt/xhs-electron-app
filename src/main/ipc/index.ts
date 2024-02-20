@@ -4,8 +4,13 @@ import { getXhsInstance, removeXhsInstances, xhsInstances } from '../puppeteer'
 import { systemDb } from '../lowdb'
 import log from 'electron-log/main'
 import { Auth, setCode } from '@main/utils/auth'
+import { setUserCustomChromePath } from '@main/config'
 
 export const listeners = {
+  [IpcChannel.SetChromePath]: async (_event, chromePath: string) => {
+    return setUserCustomChromePath(chromePath)
+  },
+
   [IpcChannel.SetAuthCode]: (_event, code: string) => {
     return setCode(code)
   },

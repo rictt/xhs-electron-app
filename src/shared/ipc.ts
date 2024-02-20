@@ -35,7 +35,9 @@ export const enum IpcChannel {
 
   SetAuthCode = 'SetAuthCode',
 
-  RemovePublish = 'RemovePublish'
+  RemovePublish = 'RemovePublish',
+
+  SetChromePath = 'SetChromePath'
 }
 
 export type IpcMainEventList = {

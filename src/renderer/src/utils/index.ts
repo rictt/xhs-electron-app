@@ -14,3 +14,11 @@ export const getAuthCode = () => {
 export const setAuthCode = (value: string) => {
   return localStorage.setItem(AuthCodeStorageKey, value)
 }
+
+const ChromePathKey = 'Chrome_PATH'
+export const setChromePath = (value: string) => {
+  return localStorage.setItem(ChromePathKey, value)
+}
+export const getChromePath = () => {
+  return localStorage.getItem(ChromePathKey) || ''
+}

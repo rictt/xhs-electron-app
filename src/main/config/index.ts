@@ -15,3 +15,21 @@ export const creator_cookie_names = [
   'feugc-status.sig',
   'feugc-status'
 ]
+
+let userCustomChromePath = ''
+
+export const setUserCustomChromePath = (newPath: string) => {
+  userCustomChromePath = newPath || ''
+  return getDefaultOsPath()
+}
+
+export const getDefaultOsPath = () => {
+  if (userCustomChromePath) {
+    return userCustomChromePath
+  }
+  if (process.platform === 'win32') {
+    return 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
+  } else {
+    return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  }
+}
