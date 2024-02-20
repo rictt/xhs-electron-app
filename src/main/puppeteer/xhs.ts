@@ -4,6 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { extractQueryByUrl, extractBodyByPostData } from '../utils'
 import { systemDb } from '@main/lowdb'
+import log from 'electron-log/main'
 
 const __dirname = path.resolve()
 

@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, protocol, net } from 'electron'
+import { app, shell, BrowserWindow, protocol, net, globalShortcut } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -9,6 +9,13 @@ import log from 'electron-log/main'
 log.initialize()
 
 log.info('main start')
+
+function registerShortCut() {
+  globalShortcut.register('f12', () => {
+    // 获取当前窗口
+    BrowserWindow.getFocusedWindow().webContents.openDevTools()
+  })
+}
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -54,6 +61,8 @@ app.whenReady().then(() => {
 
   registerIpcMainEvent()
 
+  registerShortCut()
+
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
@@ -70,4 +79,8 @@ app.on('ready', async () => {
     note.status = 'idle'
   })
   await systemDb.db.write()
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
 })

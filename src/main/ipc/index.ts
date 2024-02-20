@@ -27,6 +27,7 @@ export const listeners = {
       console.log('xhs: ', data)
       return data
     } catch (error) {
+      log.error('ValidXhsCookie error: ', error)
       console.log('xhs failed: ', error)
       return Promise.reject(error)
     } finally {
@@ -248,6 +249,7 @@ export const registerIpcMainEvent = () => {
           // @ts-ignore: 11
           response.data = await handler(event, ...rest)
         } catch (error) {
+          log.error(`handler ${name} error: `, error)
           response.success = false
           response.message = error
         }
