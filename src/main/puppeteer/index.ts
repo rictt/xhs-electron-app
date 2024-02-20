@@ -1,13 +1,21 @@
-import { Browser, Page, launch } from 'puppeteer'
+import { Browser, LaunchOptions, Page, launch } from 'puppeteer'
 import { preloadDetection, getCookies } from '../utils'
 import * as config from '../config'
 import { Xhs } from './xhs'
+import log from 'electron-log'
 
 const isDev = import.meta.env.MODE === 'development'
 
 let __browser: Browser
 // const __xhs: Xhs[] = []
 
+const getDefaultOsPath = () => {
+  if (process.platform === 'win32') {
+    return 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
+  } else {
+    return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  }
+}
 export const xhsInstances: Xhs[] = []
 
 export const removeXhsInstances = (instance: Xhs) => {
@@ -33,11 +41,13 @@ export async function getXhsInstance(params: GetInstanceParams) {
   //   }
   // }
 
+  log.info('getDefaultOsPath(): ', getDefaultOsPath())
   if (!__browser) {
     __browser = await launch({
       defaultViewport: null,
       devtools: false,
-      headless: !isDev
+      headless: !isDev,
+      executablePath: getDefaultOsPath()
     })
   }
   const browser = __browser

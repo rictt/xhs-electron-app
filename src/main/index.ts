@@ -11,7 +11,7 @@ log.initialize()
 log.info('main start')
 
 function registerShortCut() {
-  globalShortcut.register('f12', () => {
+  globalShortcut.register('CommandOrControl+Alt+K', () => {
     // 获取当前窗口
     BrowserWindow.getFocusedWindow().webContents.openDevTools()
   })
