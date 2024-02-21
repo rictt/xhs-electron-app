@@ -12,6 +12,8 @@ import {
   FormInst,
   useMessage,
   FormRules,
+  NTag,
+  NInputGroup,
   NCard
 } from 'naive-ui'
 import { onMounted, reactive, ref, toRaw } from 'vue'
@@ -58,6 +60,8 @@ const formValue = reactive({
   // pictures: [],
   pictures: [],
   accounts: [],
+  topics: [],
+  topicText: '',
   isPublic: true
 })
 const message = useMessage()
@@ -95,8 +99,10 @@ const getFormValue = (userId) => {
   Object.keys(data).forEach((key) => {
     data[key] = toRaw(data[key])
   })
+  data.topics = [...(data.topics || [])]
   data.pictures = [...data.pictures]
   delete data.accounts
+  delete data.topicText
   return data
 }
 
@@ -113,6 +119,21 @@ const selectImgFiles = async () => {
       return requireNativeImage(e)
     })
     formValue.pictures = [...formValue.pictures, ...nativeImages]
+  }
+}
+
+const handleClose = (index) => {
+  formValue.topics.splice(index, 1)
+}
+
+const handleEnter = (e) => {
+  if (e.isComposing) return
+  if (formValue.topicText) {
+    const text = formValue.topicText.replace(/#?\s*/g, '')
+    if (!formValue.topics.includes(text)) {
+      formValue.topics.push(text)
+      formValue.topicText = ''
+    }
   }
 }
 
@@ -149,6 +170,29 @@ defineExpose({
           style="margin-bottom: 10px"
         />
         <NButton @click="selectImgFiles">点击上传</NButton>
+      </div>
+    </n-form-item>
+
+    <n-form-item label="话题" path="topics">
+      <div>
+        <n-tag
+          v-for="(tag, index) in formValue.topics"
+          :key="tag"
+          style="margin-right: 10px; margin-bottom: 10px"
+          type="success"
+          closable
+          @close="handleClose(index)"
+        >
+          {{ tag }}
+        </n-tag>
+        <n-input-group style="width: 100%; margin: 10px 0">
+          <n-input
+            v-model:value="formValue.topicText"
+            placeholder="请输入话题（不需要带#）"
+            @keydown.enter="handleEnter"
+          />
+          <n-button type="primary" @click="handleEnter">提交</n-button>
+        </n-input-group>
       </div>
     </n-form-item>
 

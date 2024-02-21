@@ -179,7 +179,7 @@ export const listeners = {
   // 根据传进来的参数，挨个打开账号，输入文本，标题，图片，然后发送
   [IpcChannel.NewNote]: async (_event, params: CreateNoteForm) => {
     console.log('params: ', params)
-    const { account, title, desc, pictures, isPublic } = params
+    const { account, title, desc, pictures, topics, isPublic } = params
     const xhsInstance = await getXhsInstance({
       ...account
     })
@@ -193,6 +193,7 @@ export const listeners = {
         title,
         desc,
         pictures,
+        topics,
         isPublic
       })
       result.success = true

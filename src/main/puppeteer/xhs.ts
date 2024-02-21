@@ -58,6 +58,7 @@ export class Xhs extends EventEmitter {
     this.addRule('sns/web/v2/comment/page?note_id', this.onNoteCommentsResponse.bind(this))
     this.addRule('sns/web/v1/comment/post', this.onCommentPostResponse.bind(this), 'POST')
     this.addRule('sns/v2/note', this.onPublishNoteResponse.bind(this), 'POST')
+    this.addRule('sns/v1/search/topic', this.onTopicResponse.bind(this), 'POST')
   }
 
   addRule(path, handler, method: Method = 'GET') {
@@ -97,6 +98,15 @@ export class Xhs extends EventEmitter {
           }
         }
       }
+    }
+  }
+
+  async onTopicResponse(data, query, payload) {
+    console.log('topic data: ', data)
+    const { topic_info_dtos } = data
+    const { keyword } = payload || {}
+    if (keyword) {
+      this.emit(`topic:${keyword}`, topic_info_dtos || [])
     }
   }
 
@@ -475,11 +485,12 @@ export class Xhs extends EventEmitter {
         timer = null
         resolve('')
       })
-      const { pictures, title, desc, isPublic } = options
+      const { pictures, title, desc, isPublic, topics = [] } = options
+      // topics = ['123木头人', '吉利银河L6', '水电费是不是我们家的']
       await this.page.goto('https://creator.xiaohongshu.com/publish/publish')
       await this.timeout()
       try {
-        await this.page.waitForSelector('.login-box-container', { timeout: 1000 * 10 })
+        await this.page.waitForSelector('.login-box-container', { timeout: 1000 * 6 })
         reject('创作者账号已过期，需重新登录')
         console.log('创作者账号已过期，需重新登录')
         return
@@ -511,6 +522,15 @@ export class Xhs extends EventEmitter {
       await this.page.type('.post-content', desc, {
         delay: 50
       })
+
+      if (topics && topics.length) {
+        await this.page.type('.post-content', '\n', {
+          delay: 50
+        })
+        for (let i = 0; i < topics.length; i++) {
+          await this.setTopic(topics[i])
+        }
+      }
 
       const awaitUploadSuccess = async () => {
         return new Promise((resolve) => {
@@ -556,6 +576,49 @@ export class Xhs extends EventEmitter {
       await this.timeout()
       await this.page.click('.publishBtn')
       console.log('发布图文作品中..')
+    })
+  }
+
+  async setTopic(topicText: string) {
+    if (!topicText) {
+      return console.log('topic not found!')
+    }
+    return new Promise(async (resolve) => {
+      this.on(`topic:${topicText}`, async (topic_info_dtos: TopicItem[] = []) => {
+        if (topic_info_dtos.length) {
+          console.log('找到匹配的话题')
+          const index = topic_info_dtos.findIndex((e) => e.name === topicText)
+          if (index >= 0) {
+            await this.page.$$eval(
+              '.publish-topic-item',
+              (nodes, index) => {
+                const event = new MouseEvent('mousedown', {
+                  view: window,
+                  bubbles: true,
+                  cancelable: true
+                })
+                nodes[index].dispatchEvent(event)
+                console.log('dispatch!!', event, nodes, nodes[index])
+              },
+              index
+            )
+          } else {
+            await this.page.type('.post-content', ' ', { delay: 50 })
+          }
+        } else {
+          console.log('没有找到匹配的话题')
+          await this.page.type('.post-content', ' ', { delay: 50 })
+        }
+        clearTimeout(timer)
+        timer = null
+        resolve('')
+      })
+
+      await this.page.type('.post-content', '#' + topicText, { delay: 50 })
+      let timer = setTimeout(async () => {
+        await this.page.type('.post-content', ' ', { delay: 50 })
+        resolve('')
+      }, 1000 * 10)
     })
   }
 }

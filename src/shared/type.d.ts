@@ -57,6 +57,7 @@ declare interface CreateNewsForm {
   title: string
   desc: string
   pictures: string[]
+  topics?: string[]
   isPublic: boolean
 }
 
@@ -65,6 +66,7 @@ declare interface CreateNoteForm {
   title: string
   desc: string
   pictures: string[]
+  topics?: string[]
   isPublic: boolean
 }
 
@@ -79,4 +81,14 @@ declare interface PublishOptions {
   title: string
   desc: string
   isPublic?: boolean
+  topics?: string[]
+}
+
+declare interface TopicItem {
+  id: string
+  name: string
+  link: string
+  view_num: number
+  type: string
+  smart: boolean
 }
