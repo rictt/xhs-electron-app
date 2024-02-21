@@ -2,7 +2,9 @@
 import { NTabs, NTabPane } from 'naive-ui'
 import PublishList from './PublishList.vue'
 import Publish from './Publish.vue'
-import { reactive } from 'vue';
+import { reactive } from 'vue'
+import { Invoke } from '@renderer/utils/ipcRenderer'
+import { IpcChannel } from '@shared/ipc'
 
 const state = reactive({
   activeTab: 'list'
@@ -10,6 +12,18 @@ const state = reactive({
 
 const onChangeTab = (name: string) => {
   state.activeTab = name
+}
+const operationNote = async () => {
+  const list = await Invoke(IpcChannel.GetAccountList)
+  console.log(list)
+  await Invoke(IpcChannel.OperationNote, {
+    account: list[0],
+    note_link: 'https://www.xiaohongshu.com/explore/65bb0e7e000000002c015c5e',
+    isLike: true,
+    isCollect: true,
+    isComment: true,
+    commentText: '我！我去！马上去养一只！！'
+  } as NoteOperationOps)
 }
 </script>
 

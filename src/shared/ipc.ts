@@ -37,7 +37,11 @@ export const enum IpcChannel {
 
   RemovePublish = 'RemovePublish',
 
-  SetChromePath = 'SetChromePath'
+  SetChromePath = 'SetChromePath',
+
+  OperationNote = 'OperationNote',
+
+  ClearInstance = 'ClearInstance'
 }
 
 export type IpcMainEventList = {
@@ -47,5 +51,6 @@ export type IpcMainEventList = {
 export const AuthList: string[] = [
   IpcChannel.GetNoteList,
   IpcChannel.StartNoteMonitor,
-  IpcChannel.NewNote
+  IpcChannel.NewNote,
+  IpcChannel.OperationNote
 ]

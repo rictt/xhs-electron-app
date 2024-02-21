@@ -50,6 +50,7 @@ export class Xhs extends EventEmitter {
 
   constructor(page: Page, user_id?: string) {
     super()
+    this.status = 'idle'
     this.user_id = user_id
     this.page = page
     this.addRule('v1/you/mentions', this.onMentionsResponse.bind(this))
@@ -128,7 +129,7 @@ export class Xhs extends EventEmitter {
       this.on('meResponse', (data) => {
         clearTimeout(timer)
         timer = null
-        console.log('me response: ', data)
+        // console.log('me response: ', data)
         if (!data || data.guest) {
           reject('登录信息已过期')
         } else {
@@ -140,7 +141,7 @@ export class Xhs extends EventEmitter {
   }
 
   async onMeResponse(data) {
-    console.log('me data: ', data)
+    // console.log('me data: ', data)
     if (!data.guest) {
       this.userInfo = data
       this.user_id = data.user_id
@@ -281,24 +282,28 @@ export class Xhs extends EventEmitter {
 
   async onCommentPostResponse(data, query, payload) {
     const { note_id, target_comment_id, content } = payload || {}
-    if (!note_id || !target_comment_id || !content) {
+    // if (!note_id || !target_comment_id || !content) {
+    if (!note_id || !content) {
       console.log('onCommentPostResponse error: ', data, query, payload)
       return
     }
 
-    await systemDb.db.read()
-    const list = systemDb.data.comments || []
-    list.push({
-      note_id,
-      target_comment_id,
-      content
-    })
-    systemDb.data.comments = [...list]
-    await systemDb.db.write()
+    if (target_comment_id) {
+      await systemDb.db.read()
+      const list = systemDb.data.comments || []
+      list.push({
+        note_id,
+        target_comment_id,
+        content
+      })
+      systemDb.data.comments = [...list]
+      await systemDb.db.write()
+      const name = 'reply:' + target_comment_id
+      console.log('onCommentPostResponse: ', name)
+      this.emit(name, data)
+    }
 
-    const name = 'reply:' + target_comment_id
-    console.log('onCommentPostResponse: ', name)
-    this.emit(name, data)
+    this.emit('replyReponse', payload, data)
   }
 
   async scrollToBottom() {
@@ -620,5 +625,103 @@ export class Xhs extends EventEmitter {
         resolve('')
       }, 1000 * 10)
     })
+  }
+
+  async likeNote() {
+    try {
+      console.log('执行点赞：')
+      const useSelector = `.left .like-wrapper .like-icon use`
+      await this.page.waitForSelector(useSelector)
+      const xlink = await this.page.$eval(useSelector, (node) => {
+        return node.getAttribute('xlink:href')
+      })
+      if (xlink === '#liked') {
+        console.log('目标笔记已经like，跳过')
+        return '点赞成功'
+      }
+      await this.page.click('.left .like-wrapper')
+      await this.timeout()
+      return '点赞成功'
+    } catch (error) {
+      return error
+    }
+  }
+
+  async collectNote() {
+    try {
+      console.log('执行收藏：')
+      const useSelector = `.left .collect-wrapper .collect-icon use`
+      await this.page.waitForSelector(useSelector)
+      const xlink = await this.page.$eval(useSelector, (node) => {
+        return node.getAttribute('xlink:href')
+      })
+      if (xlink === '#collected') {
+        console.log('目标笔记已经like，跳过')
+        return '收藏成功'
+      }
+      await this.page.click('.left .collect-wrapper')
+      await this.timeout()
+      return '收藏成功'
+    } catch (error) {
+      return error
+    }
+  }
+
+  async commentNote(text: string) {
+    return new Promise(async (resolve) => {
+      try {
+        const onCommentResponse = (payload, data) => {
+          setTimeout(() => {
+            resolve('评论超时，请重试')
+            this.off('replyReponse', onCommentResponse)
+          }, 1000 * 10)
+          if (payload && payload.content && payload.content === text) {
+            this.off('replyReponse', onCommentResponse)
+            // console.log('data: ', data)
+            if (data) {
+              resolve('评论成功')
+              console.log(data?.toast)
+            }
+          }
+        }
+        this.on('replyReponse', onCommentResponse)
+        console.log('执行评论：', text)
+        const selector = `.content-edit #content-textarea`
+        await this.page.waitForSelector(selector)
+        await this.page.type(selector, text, { delay: 100 })
+        const btnSelector = `.right-btn-area .btn.submit`
+        await this.page.waitForSelector(btnSelector)
+        await this.page.$eval(btnSelector, (node: HTMLElement) => {
+          node.click()
+        })
+        await this.timeout()
+      } catch (error) {
+        resolve('评论失败')
+        log.error('commentNote: ', error)
+      }
+    })
+  }
+
+  async likeCollectComment(opts: NoteOperationOps) {
+    const { note_link, isLike, isCollect, isComment, commentText } = opts
+    const result: NoteOperationResult = {
+      like: true,
+      collect: true,
+      comment: true
+    }
+    if (note_link) {
+      await this.page.goto(note_link)
+    }
+    if (isLike) {
+      result.likeMessage = await this.likeNote()
+    }
+    if (isCollect) {
+      result.collectMessage = await this.collectNote()
+    }
+    if (isComment) {
+      result.commentMessage = (await this.commentNote(commentText)) as any
+    }
+
+    return result
   }
 }

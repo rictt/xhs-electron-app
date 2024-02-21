@@ -13,7 +13,7 @@ import {
   NPopconfirm,
   useMessage
 } from 'naive-ui'
-import { AddSharp, PersonAddOutline } from '@vicons/ionicons5'
+import { AddSharp, PersonAddOutline, TrainOutline } from '@vicons/ionicons5'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { IpcChannel } from '@shared/ipc'
 import { globalState } from '@renderer/store/index'
@@ -143,8 +143,8 @@ const getAccounts = async () => {
   return await Invoke(IpcChannel.GetAccountList)
 }
 
-const showManagePublish = () => {
-  globalState.activeComponetName = 'Publish'
+const showManagePage = (name: string) => {
+  globalState.activeComponetName = name as any
 }
 
 const editNew = () => {
@@ -254,7 +254,13 @@ defineExpose({
         </template>
         添加新账号
       </NButton>
-      <NButton type="primary" @click="showManagePublish">
+      <NButton type="warning" dashed @click="showManagePage('LikeComment')">
+        <template #icon>
+          <TrainOutline />
+        </template>
+        批量点赞/评论
+      </NButton>
+      <NButton type="primary" @click="showManagePage('Publish')">
         <template #icon>
           <AddSharp />
         </template>

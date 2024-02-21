@@ -4,6 +4,7 @@ import { PersonAddOutline } from '@vicons/ionicons5'
 import { globalState } from '@renderer/store'
 import AccountPanel from './AccountPanel.vue'
 import ManagePublish from './ManagePublish.vue'
+import ManageLikeComment from './ManageLikeComment.vue'
 import { onMounted, reactive } from 'vue'
 import { Invoke } from '@renderer/utils/ipcRenderer'
 import { getChromePath, setChromePath } from '@renderer/utils/index'
@@ -90,6 +91,7 @@ defineEmits(['add-account'])
     <div v-show="globalState.activeComponetName" class="sys-scrollbar other-content">
       <div class="content-body">
         <ManagePublish v-show="globalState.activeComponetName === 'Publish'" />
+        <ManageLikeComment v-show="globalState.activeComponetName === 'LikeComment'" />
       </div>
     </div>
   </div>

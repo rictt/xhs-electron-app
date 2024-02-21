@@ -92,3 +92,25 @@ declare interface TopicItem {
   type: string
   smart: boolean
 }
+
+declare interface NoteOperationOps {
+  account?: XhsAccount
+  note_link: string
+
+  isLike?: boolean
+  isCollect?: boolean
+  isComment?: boolean
+
+  commentText?: string
+}
+
+declare interface NoteOperationResult {
+  like: boolean
+  likeMessage?: string
+
+  collect: boolean
+  collectMessage?: string
+
+  comment: boolean
+  commentMessage?: string
+}

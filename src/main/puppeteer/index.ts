@@ -34,12 +34,11 @@ type GetInstanceParams = {
 
 export async function getXhsInstance(params: GetInstanceParams) {
   const { baseCookie, creatorCookie, user_id } = params
-  // if (user_id) {
-  //   const instance = __xhs.find((e) => e.user_id === user_id)
-  //   if (instance) {
-  //     return instance
-  //   }
-  // }
+
+  const existInstance = xhsInstances.find((e) => e.user_id === user_id)
+  if (existInstance) {
+    return existInstance
+  }
 
   log.info('getDefaultOsPath(): ', config.getDefaultOsPath())
   if (!__browser) {

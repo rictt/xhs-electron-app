@@ -3,12 +3,12 @@ import { reactive } from 'vue'
 type GlobalState = {
   currentAccount: XhsAccount | null
   accountList: XhsAccount[]
-  activeComponetName: 'Publish' | ''
+  activeComponetName: 'Publish' | 'LikeComment' | ''
 }
 
 export const globalState = reactive<GlobalState>({
   currentAccount: null,
   accountList: [],
   // activeComponetName: 'Publish'
-  activeComponetName: ''
+  activeComponetName: 'LikeComment'
 })

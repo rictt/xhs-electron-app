@@ -36,7 +36,8 @@ export const listeners = {
       console.log('xhs failed: ', error)
       return Promise.reject(error)
     } finally {
-      xhs.page.close()
+      await xhs.page.close()
+      removeXhsInstances(xhs)
     }
   },
 
@@ -106,6 +107,7 @@ export const listeners = {
         console.log('write notes: ', systemDb.data.notes.length)
         await systemDb.db.write()
         await xhs.page.close()
+        removeXhsInstances(xhs)
         return userOwn
       } catch (error) {
         log.error('get Note list error: ', error)
@@ -229,6 +231,30 @@ export const listeners = {
       )
     }
     await systemDb.db.write()
+  },
+
+  [IpcChannel.OperationNote]: async (_event, params: NoteOperationOps) => {
+    const { account } = params
+    const xhs = await getXhsInstance({
+      ...account
+    })
+    await xhs.validCookie()
+    const response = await xhs.likeCollectComment(params)
+
+    xhs.status = 'idle'
+    return response
+  },
+
+  [IpcChannel.ClearInstance]: async (_event, user_id: string) => {
+    if (!user_id) return ''
+    let instance = xhsInstances.find((e) => e.user_id == user_id && e.status === 'idle')
+    console.log('xhsInstances length: ', xhsInstances)
+    while (instance) {
+      await instance.page.close()
+      removeXhsInstances(instance)
+      instance = xhsInstances.find((e) => e.user_id == user_id && e.status === 'idle')
+    }
+    return true
   }
 }
 
