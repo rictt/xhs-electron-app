@@ -86,6 +86,15 @@ class SystemDB {
     await this.db.write()
     console.log(this.db.data.notes[this.db.data.notes.length - 1])
   }
+
+  async updateArticle(id: string, key: string, value: any) {
+    const target = this.db.data.articles.find((e) => e.id === id)
+    if (target) {
+      target[key] = value
+    }
+    this.db.data.articles = [...this.db.data.articles]
+    await this.db.write()
+  }
 }
 
 export const systemDb = new SystemDB()

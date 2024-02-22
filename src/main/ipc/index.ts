@@ -5,6 +5,7 @@ import { systemDb } from '../lowdb'
 import log from 'electron-log/main'
 import { Auth, setCode } from '@main/utils/auth'
 import { setUserCustomChromePath } from '@main/config'
+import { createTaskScheduleInst, removeTaskInstance } from '@main/puppeteer/task'
 
 export const listeners = {
   [IpcChannel.SetChromePath]: async (_event, chromePath: string) => {
@@ -164,8 +165,22 @@ export const listeners = {
     return true
   },
 
-  [IpcChannel.GetArticleList]: async (_event: IpcMainEvent) => {
-    return systemDb.data.articles
+  [IpcChannel.GetArticleList]: async (_event) => {
+    const list = systemDb.data.articles.map((e) => {
+      const item = {
+        ...e
+      }
+      if (item.taskOps) {
+        delete item.taskOps.task
+      }
+      return item
+    })
+    return list
+  },
+
+  [IpcChannel.UpdateArticle]: async (_event, id: string, key: string, value: any) => {
+    await systemDb.updateArticle(id, key, value)
+    return true
   },
 
   [IpcChannel.ShowOpenDialogSync]: async (_event: IpcMainEvent, options: OpenDialogOptions) => {
@@ -208,7 +223,9 @@ export const listeners = {
         pictures,
         user_id: account.user_id,
         account: account,
-        create_time: Date.now()
+        create_time: Date.now(),
+        isPublic,
+        topics
       })
       systemDb.data.articles = articles
       await systemDb.db.write()
@@ -255,6 +272,40 @@ export const listeners = {
       instance = xhsInstances.find((e) => e.user_id == user_id && e.status === 'idle')
     }
     return true
+  },
+
+  [IpcChannel.StartAutoPublish]: async (
+    _event: IpcMainEvent,
+    articleItem: ArticleDataItem,
+    ops: TaskSchedulingOps
+  ) => {
+    if (!articleItem || !articleItem.id) {
+      return console.log('article empty')
+    }
+    ops.task = () => {
+      console.log('执行了一次')
+      listeners[IpcChannel.NewNote](_event, {
+        account: articleItem.account,
+        title: articleItem.title,
+        desc: articleItem.desc,
+        pictures: articleItem.pictures,
+        isPublic: articleItem.isPublic,
+        topics: articleItem.topics
+      })
+    }
+    const ins = await createTaskScheduleInst(articleItem.id, ops)
+    ins.on('end', () => {
+      console.log('StartAutoPublish end 结束')
+    })
+    return true
+  },
+
+  [IpcChannel.StopAutoPublish]: async (_event, articleId: string) => {
+    if (!articleId) {
+      return console.log('articleId empty')
+    }
+    await removeTaskInstance(articleId)
+    await systemDb.updateArticle(articleId, 'taskOps', null)
   }
 }
 

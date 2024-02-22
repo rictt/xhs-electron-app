@@ -22,6 +22,7 @@ import { getAuthCode, setAuthCode } from '@renderer/utils'
 import { Invoke } from '@renderer/utils/ipcRenderer'
 // @ts-ignore: 11
 import logo from '../../../../resources/icon.png?asset'
+import { version } from '@shared/index'
 
 const message = useMessage()
 
@@ -204,23 +205,14 @@ defineExpose({
       </div>
       <div v-show="!state.authcode || state.editAuthcode" class="account-id">
         授权码：
-        <NInput
-          ref="newInput"
-          v-model:value="state.newAuthcode"
-          placeholder="填写授权码"
-          @blur="onCodeBlurChange"
-        />
+        <NInput ref="newInput" v-model:value="state.newAuthcode" placeholder="填写授权码" @blur="onCodeBlurChange" />
       </div>
     </div>
     <n-radio-group v-model:value="state.currentUserId" style="width: 100%">
       <div class="xhs-list">
-        <div
-          v-for="account in state.accounts"
-          :key="account.user_id"
-          class="xhs-item"
+        <div v-for="account in state.accounts" :key="account.user_id" class="xhs-item"
           :class="{ active: globalState.currentAccount?.user_id === account.user_id }"
-          @click.stop="checkoutAccount(account)"
-        >
+          @click.stop="checkoutAccount(account)">
           <n-radio style="margin-right: 10px" :value="account.user_id"></n-radio>
           <img class="xhs-avatar" :src="account.images" />
           <div class="xhs-info">
@@ -229,14 +221,8 @@ defineExpose({
             </div>
           </div>
           <div class="btn-operate">
-            <NButton text type="primary" size="small" @click="showEditDialog(account)"
-              >编辑</NButton
-            >
-            <n-popconfirm
-              :negative-text="null"
-              positive-text="确认"
-              @positive-click="showRemove(account)"
-            >
+            <NButton text type="primary" size="small" @click="showEditDialog(account)">编辑</NButton>
+            <n-popconfirm :negative-text="null" positive-text="确认" @positive-click="showRemove(account)">
               <template #trigger>
                 <n-button style="margin: 0 4px" text type="error" size="small">删除</n-button>
               </template>
@@ -270,30 +256,17 @@ defineExpose({
 
     <div class="others">
       <NSpace>
-        <NButton
-          tag="a"
-          href="https://www.mubu.com/doc/4hiwQj9-Y-f"
-          target="_blank"
-          text
-          size="large"
-          type="primary"
-          >使用教程</NButton
-        >
-        <NButton text size="large" type="primary" @click="state.feedbackModalShow = true"
-          >关于软件</NButton
-        >
+        <NButton tag="a" href="https://www.mubu.com/doc/4hiwQj9-Y-f" target="_blank" text size="large" type="primary">使用教程
+        </NButton>
+        <NButton text size="large" type="primary" @click="state.feedbackModalShow = true">关于软件</NButton>
+      </NSpace>
+      <NSpace>
+        <NButton text size="large" type="primary">版本：v{{ version }}</NButton>
       </NSpace>
     </div>
 
-    <NModal
-      v-model:show="state.modalShow"
-      to="body"
-      :mask-closable="false"
-      :close-on-esc="false"
-      preset="card"
-      title="操作"
-      style="width: 500px"
-    >
+    <NModal v-model:show="state.modalShow" to="body" :mask-closable="false" :close-on-esc="false" preset="card" title="操作"
+      style="width: 500px">
       <n-form ref="formRef" :label-width="80" :model="form.value" :rules="form.rules">
         <n-form-item v-if="form.value.accountId" label="账号ID" path="value.accountId" required>
           <n-input v-model:value="form.value.accountId" placeholder="可以忽略" :disabled="true" />
@@ -308,26 +281,15 @@ defineExpose({
           <div style="width: 100%; text-align: right">
             <n-space style="justify-content: flex-end">
               <n-button @click="state.modalShow = false">取消</n-button>
-              <n-button
-                :loading="form.loading"
-                type="primary"
-                attr-type="button"
-                @click="handleValidateClick"
-                >验证</n-button
-              >
+              <n-button :loading="form.loading" type="primary" attr-type="button"
+                @click="handleValidateClick">验证</n-button>
             </n-space>
           </div>
         </n-form-item>
       </n-form>
     </NModal>
 
-    <NModal
-      v-model:show="state.feedbackModalShow"
-      to="body"
-      preset="card"
-      title="关于软件"
-      style="width: 600px"
-    >
+    <NModal v-model:show="state.feedbackModalShow" to="body" preset="card" title="关于软件" style="width: 600px">
       <div style="line-height: 2">
         <h4>作者声明：没有在任何平台进行代码售卖，请谨慎鉴别，上当受骗作者一律不负责</h4>
         <h4>

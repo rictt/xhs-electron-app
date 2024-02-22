@@ -49,7 +49,12 @@ declare interface ArticleDataItem {
   account?: XhsAccount
   pictures?: string[]
   channel?: string
+  isPublic?: boolean
   create_time: number
+
+  taskOps?: TaskSchedulingOps
+  topics?: string[]
+  taskScheduling?: TaskScheduling
 }
 
 declare interface CreateNewsForm {
@@ -113,4 +118,26 @@ declare interface NoteOperationResult {
 
   comment: boolean
   commentMessage?: string
+}
+
+declare interface TaskSchedulingOps {
+  // 时间戳
+  startTime: number
+  endTime?: number
+  // 0等于不限次数
+  times?: number
+  // 毫秒数
+  interval?: number
+  isRunNow?: boolean
+
+  key?: string | number
+  task: (now: number) => any
+}
+
+declare class TaskScheduling {
+  constructor(options: TaskSchedulingOps)
+
+  start(): void
+  stop(): void
+  checkCanExecute(): void
 }

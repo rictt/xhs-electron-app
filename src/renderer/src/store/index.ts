@@ -9,6 +9,7 @@ type GlobalState = {
 export const globalState = reactive<GlobalState>({
   currentAccount: null,
   accountList: [],
+  activeComponetName: ''
   // activeComponetName: 'Publish'
-  activeComponetName: 'LikeComment'
+  // activeComponetName: 'LikeComment'
 })

@@ -8,6 +8,7 @@ export async function Invoke(channel: string, ...args: any[]) {
       return window.$message.error('请检查授权码是否正确/有效')
     }
   }
+  console.log('args: ', args)
   const { data, success, message } = await window.electron.ipcRenderer.invoke(channel, ...args)
   // return window.electron.ipcRenderer.invoke(channel, ...args)
   console.log(data, success, message)

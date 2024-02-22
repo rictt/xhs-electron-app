@@ -25,6 +25,8 @@ export const enum IpcChannel {
 
   GetArticle = 'GetArticle',
 
+  UpdateArticle = 'UpdateArticle',
+
   ShowOpenDialogSync = 'ShowOpenDialogSync',
 
   NewNotes = 'NewNotes',
@@ -41,7 +43,11 @@ export const enum IpcChannel {
 
   OperationNote = 'OperationNote',
 
-  ClearInstance = 'ClearInstance'
+  ClearInstance = 'ClearInstance',
+
+  StartAutoPublish = 'StartAutoPublish',
+
+  StopAutoPublish = 'StopAutoPublish'
 }
 
 export type IpcMainEventList = {
