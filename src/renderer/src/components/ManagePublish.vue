@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { NTabs, NTabPane } from 'naive-ui'
 import PublishList from './PublishList.vue'
+import AutoPublishList from './AutoPublishList.vue'
 import Publish from './Publish.vue'
 import { reactive } from 'vue'
 import { Invoke } from '@renderer/utils/ipcRenderer'
@@ -34,6 +35,9 @@ const operationNote = async () => {
     </n-tab-pane>
     <n-tab-pane name="new" tab="发布新的">
       <Publish @change-tab="onChangeTab" />
+    </n-tab-pane>
+    <n-tab-pane name="auto" tab="自动发布记录">
+      <AutoPublishList />
     </n-tab-pane>
   </n-tabs>
 </template>

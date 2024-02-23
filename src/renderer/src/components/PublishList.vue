@@ -21,6 +21,7 @@ import ImageList from './ImageList.vue'
 import { requireNativeImage } from '@renderer/utils'
 import { toRaw, ref } from 'vue'
 import { Invoke } from '@renderer/utils/ipcRenderer'
+import type { IpcRendererEvent } from 'electron/renderer'
 
 const formRef = ref<FormInst | null>(null)
 const removePublish = async (row) => {
@@ -215,7 +216,7 @@ const handleValidateClick = () => {
           startTime: formValue.startTime,
           endTime: formValue.endTime,
           times: formValue.times ? parseInt(formValue.times) : undefined,
-          interval: formValue.interval ? parseInt(formValue.interval) * 1000 : undefined,
+          interval: formValue.interval ? parseInt(formValue.interval) * 1000 * 60 : undefined,
           key: state.currentRowId,
           task: () => {}
         }
@@ -256,9 +257,9 @@ const goSync = async () => {
 const getList = async () => {
   try {
     state.loading = true
-    const list = await Invoke(IpcChannel.GetArticleList)
+    const list = (await Invoke(IpcChannel.GetArticleList)) as ArticleDataItem[]
     console.log('list: ', list)
-    state.tableData = list.sort((a, b) => b.create_time - a.create_time)
+    state.tableData = list.sort((a, b) => b.create_time - a.create_time).filter((e) => !e.isAuto)
   } finally {
     state.loading = false
   }
@@ -272,6 +273,14 @@ watch(
     }
   }
 )
+
+window.electron.ipcRenderer.on('AutoPublishProgress', (event: IpcRendererEvent) => {
+  console.log('receive from AutoPublishProgress: ', event)
+  if (state.modalLoading || state.modalShow || formValue.loading) {
+    return
+  }
+  getList()
+})
 
 onMounted(() => {
   getList()
@@ -338,12 +347,12 @@ onMounted(() => {
       </n-form-item>
       <n-form-item
         v-if="formValue.times > 1 || (formValue.endTime && !formValue.times)"
-        label="间隔(秒）"
+        label="间隔(分钟）"
         path="interval"
       >
         <n-input
           v-model:value="formValue.interval"
-          placeholder="请输入执行间隔，比如输入1（即1秒执行一次"
+          placeholder="请输入执行间隔，比如输入1（即1分钟执行一次"
         />
       </n-form-item>
       <n-form-item>

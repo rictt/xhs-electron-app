@@ -89,6 +89,17 @@ export class TaskScheduling {
     return true
   }
 
+  isEnd() {
+    const { startTime, endTime, times, runTimes } = this
+    if (endTime && endTime < Date.now()) {
+      return true
+    }
+    if (times && runTimes >= times) {
+      return true
+    }
+    return false
+  }
+
   stop() {
     this.runTimes = 1000000
     clearTimeout(this.timer)
@@ -102,6 +113,10 @@ export class TaskScheduling {
       clearTimeout(this.startTimer)
       clearTimeout(this.timer)
       this.timer = null
+      if (this.isEnd()) {
+        this.emit('end')
+        return
+      }
       this.timer = setTimeout(this.execute, this.interval)
     }
   }

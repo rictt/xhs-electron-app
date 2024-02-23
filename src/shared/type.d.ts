@@ -50,6 +50,8 @@ declare interface ArticleDataItem {
   pictures?: string[]
   channel?: string
   isPublic?: boolean
+  // 是否为自动发布
+  isAuto?: boolean
   create_time: number
 
   taskOps?: TaskSchedulingOps
@@ -73,6 +75,7 @@ declare interface CreateNoteForm {
   pictures: string[]
   topics?: string[]
   isPublic: boolean
+  isAuto?: boolean
 }
 
 declare interface PublishResult {

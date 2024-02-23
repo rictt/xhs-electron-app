@@ -78,6 +78,9 @@ app.on('ready', async () => {
   systemDb.data.notes.forEach((note) => {
     note.status = 'idle'
   })
+  systemDb.data.articles.forEach((article) => {
+    article.taskOps = null
+  })
   await systemDb.db.write()
 })
 

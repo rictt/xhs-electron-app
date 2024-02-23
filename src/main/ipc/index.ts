@@ -6,6 +6,7 @@ import log from 'electron-log/main'
 import { Auth, setCode } from '@main/utils/auth'
 import { setUserCustomChromePath } from '@main/config'
 import { createTaskScheduleInst, removeTaskInstance } from '@main/puppeteer/task'
+import { IpcMainInvokeEvent } from 'electron/main'
 
 export const listeners = {
   [IpcChannel.SetChromePath]: async (_event, chromePath: string) => {
@@ -196,7 +197,7 @@ export const listeners = {
   // 根据传进来的参数，挨个打开账号，输入文本，标题，图片，然后发送
   [IpcChannel.NewNote]: async (_event, params: CreateNoteForm) => {
     console.log('params: ', params)
-    const { account, title, desc, pictures, topics, isPublic } = params
+    const { account, title, desc, pictures, topics, isPublic, isAuto } = params
     const xhsInstance = await getXhsInstance({
       ...account
     })
@@ -225,6 +226,7 @@ export const listeners = {
         account: account,
         create_time: Date.now(),
         isPublic,
+        isAuto,
         topics
       })
       systemDb.data.articles = articles
@@ -275,7 +277,7 @@ export const listeners = {
   },
 
   [IpcChannel.StartAutoPublish]: async (
-    _event: IpcMainEvent,
+    _event: IpcMainInvokeEvent,
     articleItem: ArticleDataItem,
     ops: TaskSchedulingOps
   ) => {
@@ -290,12 +292,15 @@ export const listeners = {
         desc: articleItem.desc,
         pictures: articleItem.pictures,
         isPublic: articleItem.isPublic,
-        topics: articleItem.topics
+        topics: articleItem.topics,
+        isAuto: true
       })
     }
     const ins = await createTaskScheduleInst(articleItem.id, ops)
     ins.on('end', () => {
       console.log('StartAutoPublish end 结束')
+      console.log('通知前台进行刷新页面')
+      _event.sender.send('AutoPublishProgress')
     })
     return true
   },
