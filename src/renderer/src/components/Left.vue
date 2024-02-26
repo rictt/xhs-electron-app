@@ -11,6 +11,7 @@ import {
   NIcon,
   NModal,
   NPopconfirm,
+  NSelect,
   useMessage
 } from 'naive-ui'
 import { AddSharp, PersonAddOutline, TrainOutline } from '@vicons/ionicons5'
@@ -24,6 +25,12 @@ import { Invoke } from '@renderer/utils/ipcRenderer'
 import logo from '../../../../resources/icon.png?asset'
 import { version } from '@shared/index'
 
+const protocolOps = [
+  { label: 'http', value: 'http' },
+  { label: 'https', value: 'https' },
+  { label: 'socks4', value: 'socks4' },
+  { label: 'socks5', value: 'socks5' }
+]
 const message = useMessage()
 
 const newInput = ref('')
@@ -46,21 +53,46 @@ const form = reactive({
   value: {
     accountId: '',
     baseCookie: '',
-    creatorCookie: ''
+    creatorCookie: '',
+    proxyProtocol: 'http',
+    proxyHost: '',
+    proxyPort: ''
   },
   rules: {
     baseCookie: {
       required: true,
       message: '不能为空',
       trigger: 'blur'
+    },
+    proxyPort: {
+      trigger: ['blur', 'change'],
+      validator: (rules, value, callback) => {
+        if (form.value.proxyHost && !value) {
+          callback('端口不能为空')
+          return false
+        }
+        return true
+      }
     }
-    // creatorCookie: {
-    //   required: true,
-    //   message: '不能为空',
-    //   trigger: 'blur'
-    // }
   }
 })
+
+const onHostBlur = () => {
+  const value = form.value.proxyHost
+  if (value) {
+    const parts = value.split(':')
+    const port = value.indexOf(':/') !== -1 ? parts[2] : parts[1]
+    const protocol = value.indexOf('://') !== -1 ? parts[0] : null
+    if (protocol) {
+      form.value.proxyProtocol = protocol
+      form.value.proxyHost = value.replace(`${protocol}://`, '')
+    }
+    if (port) {
+      form.value.proxyPort = port
+      form.value.proxyHost = value.replace(`:${port}`, '')
+    }
+  }
+}
 
 const showNewDialog = () => {
   state.modalShow = true
@@ -94,7 +126,10 @@ const handleValidateClick = () => {
           ...data,
           user_id: data.user_id || form.value.accountId || '',
           baseCookie: form.value.baseCookie,
-          creatorCookie: form.value.creatorCookie
+          creatorCookie: form.value.creatorCookie,
+          proxyProtocol: form.value.proxyProtocol,
+          proxyHost: form.value.proxyHost,
+          proxyPort: form.value.proxyPort
         })
         setTimeout(() => {
           state.modalShow = false
@@ -117,6 +152,9 @@ const showEditDialog = (item: XhsAccount) => {
   form.value.baseCookie = item.baseCookie
   form.value.creatorCookie = item.creatorCookie
   form.value.accountId = item.user_id
+  form.value.proxyProtocol = item.proxyProtocol
+  form.value.proxyHost = item.proxyHost
+  form.value.proxyPort = item.proxyPort
 }
 
 const onModalVisibleChange = (value: boolean) => {
@@ -205,24 +243,38 @@ defineExpose({
       </div>
       <div v-show="!state.authcode || state.editAuthcode" class="account-id">
         授权码：
-        <NInput ref="newInput" v-model:value="state.newAuthcode" placeholder="填写授权码" @blur="onCodeBlurChange" />
+        <NInput
+          ref="newInput"
+          v-model:value="state.newAuthcode"
+          placeholder="填写授权码"
+          @blur="onCodeBlurChange"
+        />
       </div>
     </div>
     <n-radio-group v-model:value="state.currentUserId" style="width: 100%">
       <div class="xhs-list">
-        <div v-for="account in state.accounts" :key="account.user_id" class="xhs-item"
+        <div
+          v-for="account in state.accounts"
+          :key="account.user_id"
+          class="xhs-item"
           :class="{ active: globalState.currentAccount?.user_id === account.user_id }"
-          @click.stop="checkoutAccount(account)">
+          @click.stop="checkoutAccount(account)"
+        >
           <n-radio style="margin-right: 10px" :value="account.user_id"></n-radio>
           <img class="xhs-avatar" :src="account.images" />
           <div class="xhs-info">
             <div class="info-nickname">{{ account.nickname }}</div>
-            <div class="info-status">
-            </div>
+            <div class="info-status"></div>
           </div>
           <div class="btn-operate">
-            <NButton text type="primary" size="small" @click="showEditDialog(account)">编辑</NButton>
-            <n-popconfirm :negative-text="null" positive-text="确认" @positive-click="showRemove(account)">
+            <NButton text type="primary" size="small" @click="showEditDialog(account)"
+              >编辑</NButton
+            >
+            <n-popconfirm
+              :negative-text="null"
+              positive-text="确认"
+              @positive-click="showRemove(account)"
+            >
               <template #trigger>
                 <n-button style="margin: 0 4px" text type="error" size="small">删除</n-button>
               </template>
@@ -256,18 +308,34 @@ defineExpose({
 
     <div class="others">
       <NSpace>
-        <NButton tag="a" href="https://www.mubu.com/doc/4hiwQj9-Y-f" target="_blank" text size="large" type="primary">使用教程
+        <NButton
+          tag="a"
+          href="https://www.mubu.com/doc/4hiwQj9-Y-f"
+          target="_blank"
+          text
+          size="large"
+          type="primary"
+          >使用教程
         </NButton>
-        <NButton text size="large" type="primary" @click="state.feedbackModalShow = true">关于软件</NButton>
+        <NButton text size="large" type="primary" @click="state.feedbackModalShow = true"
+          >关于软件</NButton
+        >
       </NSpace>
       <NSpace>
         <NButton text size="large" type="primary">版本：v{{ version }}</NButton>
       </NSpace>
     </div>
 
-    <NModal v-model:show="state.modalShow" to="body" :mask-closable="false" :close-on-esc="false" preset="card" title="操作"
-      style="width: 500px">
-      <n-form ref="formRef" :label-width="80" :model="form.value" :rules="form.rules">
+    <NModal
+      v-model:show="state.modalShow"
+      to="body"
+      :mask-closable="false"
+      :close-on-esc="false"
+      preset="card"
+      title="操作"
+      style="width: 500px"
+    >
+      <n-form ref="formRef" label-width="auto" :model="form.value" :rules="form.rules">
         <n-form-item v-if="form.value.accountId" label="账号ID" path="value.accountId" required>
           <n-input v-model:value="form.value.accountId" placeholder="可以忽略" :disabled="true" />
         </n-form-item>
@@ -277,19 +345,49 @@ defineExpose({
         <n-form-item label="发布Cookie" path="creatorCookie">
           <n-input v-model:value="form.value.creatorCookie" placeholder="请输入" />
         </n-form-item>
+        <div style="display: flex; justify-content: space-between; gap: 0 10px">
+          <n-form-item style="width: 100px" label="代理协议" path="proxyProtocol">
+            <n-select
+              v-model:value="form.value.proxyProtocol"
+              placeholder="Select"
+              :options="protocolOps"
+            />
+          </n-form-item>
+          <n-form-item style="flex: 1" label="代理主机" path="proxyHost">
+            <n-input
+              v-model:value="form.value.proxyHost"
+              placeholder="请输入主机地址"
+              @blur="onHostBlur"
+            />
+          </n-form-item>
+          <n-form-item style="width: 100px" label="代理端口" path="proxyPort">
+            <n-input v-model:value="form.value.proxyPort" placeholder="请输入端口" />
+          </n-form-item>
+        </div>
         <n-form-item>
           <div style="width: 100%; text-align: right">
             <n-space style="justify-content: flex-end">
               <n-button @click="state.modalShow = false">取消</n-button>
-              <n-button :loading="form.loading" type="primary" attr-type="button"
-                @click="handleValidateClick">验证</n-button>
+              <n-button
+                :loading="form.loading"
+                type="primary"
+                attr-type="button"
+                @click="handleValidateClick"
+                >验证</n-button
+              >
             </n-space>
           </div>
         </n-form-item>
       </n-form>
     </NModal>
 
-    <NModal v-model:show="state.feedbackModalShow" to="body" preset="card" title="关于软件" style="width: 600px">
+    <NModal
+      v-model:show="state.feedbackModalShow"
+      to="body"
+      preset="card"
+      title="关于软件"
+      style="width: 600px"
+    >
       <div style="line-height: 2">
         <h4>作者声明：没有在任何平台进行代码售卖，请谨慎鉴别，上当受骗作者一律不负责</h4>
         <h4>

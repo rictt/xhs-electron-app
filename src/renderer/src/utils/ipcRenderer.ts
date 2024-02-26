@@ -25,19 +25,20 @@ export const extractErrorMessage = (message) => {
   if (!message) {
     return '系统出错，请联系开发者'
   }
+  message = typeof message === 'object' && message?.message ? message?.message : message
 
-  if (typeof message === 'object') {
-    console.log(message)
-    console.dir(message)
-    return message?.message || JSON.stringify(message)
-  }
-
-  if (typeof message === 'string') {
+  if (message && typeof message === 'string') {
     if (message.indexOf('Failed to launch the browser') !== -1) {
       return '浏览器启动失败，请联系开发者排查'
     }
     if (message.indexOf('Failed to deserialize params.cookies.value') !== -1) {
       return '请检查cookie格式是否正确'
+    }
+    if (
+      message.indexOf('ERR_TUNNEL_CONNECTION_FAILED') !== -1 ||
+      message.indexOf('ERR_TIMED_OUT') !== -1
+    ) {
+      return '请检查代理或网络是否设置正确'
     }
   }
   return message

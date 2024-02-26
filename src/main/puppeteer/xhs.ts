@@ -48,6 +48,13 @@ export class Xhs extends EventEmitter {
   timer: string | number | NodeJS.Timeout
   monitor_id?: string
 
+  proxy_protocol?: string
+  proxy_host?: string
+  proxy_port?: string
+  proxy_auth_username?: string
+  proxy_auth_password?: string
+  proxy_get_url?: string
+
   constructor(page: Page, user_id?: string) {
     super()
     this.status = 'idle'

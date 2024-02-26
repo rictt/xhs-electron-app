@@ -1,4 +1,4 @@
-import { Browser, LaunchOptions, Page, launch } from 'puppeteer'
+import { Browser, BrowserContextOptions, LaunchOptions, Page, launch } from 'puppeteer'
 import { preloadDetection, getCookies } from '../utils'
 import * as config from '../config'
 import { Xhs } from './xhs'
@@ -30,10 +30,13 @@ type GetInstanceParams = {
   baseCookie: string
   creatorCookie: string
   user_id?: string
+  proxyProtocol?: string
+  proxyHost?: string
+  proxyPort?: string
 }
 
 export async function getXhsInstance(params: GetInstanceParams) {
-  const { baseCookie, creatorCookie, user_id } = params
+  const { baseCookie, creatorCookie, user_id, proxyProtocol, proxyHost, proxyPort } = params
 
   const existInstance = xhsInstances.find((e) => e.user_id === user_id)
   if (existInstance) {
@@ -54,8 +57,12 @@ export async function getXhsInstance(params: GetInstanceParams) {
     console.log('[browser disconnected]')
   })
 
-  const context = await browser.createIncognitoBrowserContext()
-  // const page = await browser.newPage()
+  const browserContextOps: BrowserContextOptions = {}
+  if (proxyProtocol && proxyHost && proxyPort) {
+    browserContextOps.proxyServer = `${proxyProtocol}://${proxyHost}:${proxyPort}`
+  }
+  console.log('proxy: ', browserContextOps.proxyServer)
+  const context = await browser.createIncognitoBrowserContext(browserContextOps)
   const page = await context.newPage()
   const xhs = new Xhs(page, user_id)
   xhsInstances.push(xhs)
@@ -66,6 +73,23 @@ export async function getXhsInstance(params: GetInstanceParams) {
 
   const cookies = getCookies(baseCookie, creatorCookie)
   page.on('response', (response) => xhs.onResponse(response))
+  page.on('requestfailed', (error: any) => {
+    const failedResult: string = error?._failureText || ''
+    console.log('requestfailed: ', failedResult)
+    if (browserContextOps.proxyServer) {
+      if (
+        failedResult &&
+        (failedResult.indexOf('ERR_TIMED_OUT') !== -1 ||
+          failedResult.indexOf('ERR_TUNNEL_CONNECTION_FAILED')! == -1)
+      ) {
+        // 清除xhs instance，避免重试失败
+        removeXhsInstances(xhs)
+        context.close()
+        console.log('clear success!')
+      }
+    }
+  })
+
   await preloadDetection(page)
   await page.setUserAgent(config.headers.userAgent)
   await page.setCookie(...cookies)

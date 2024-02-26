@@ -27,8 +27,14 @@ export const listeners = {
   },
 
   [IpcChannel.ValidXhsCookie]: async (_event: IpcMainEvent, args: any) => {
-    const { baseCookie, creatorCookie } = args
-    const xhs = await getXhsInstance({ baseCookie, creatorCookie })
+    const { baseCookie, creatorCookie, proxyProtocol, proxyHost, proxyPort } = args
+    const xhs = await getXhsInstance({
+      baseCookie,
+      creatorCookie,
+      proxyProtocol,
+      proxyHost,
+      proxyPort
+    })
     try {
       const data = await xhs.validCookie()
       console.log('xhs: ', data)
@@ -45,6 +51,7 @@ export const listeners = {
 
   [IpcChannel.AddAccount]: async (_event: IpcMainEvent, user: any) => {
     try {
+      console.log('add user: ', user)
       await systemDb.addAccount(user)
     } catch (error) {
       return false

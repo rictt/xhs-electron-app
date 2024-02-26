@@ -19,6 +19,10 @@ declare interface XhsAccount {
   gender: number
   images: string
   imageb: string
+
+  proxyProtocol?: string
+  proxyHost?: string
+  proxyPort?: string
 }
 
 type NoteStatus = 'monitor' | 'idle'
