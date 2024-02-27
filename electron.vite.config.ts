@@ -6,6 +6,7 @@ import obfuscatorPlugin from 'rollup-plugin-javascript-obfuscator'
 
 // https://juejin.cn/post/7159874461104570382
 const obConfig = {
+  splitStrings: true,
   // 压缩,无换行
   compact: true,
   // 是否启用控制流扁平化(降低1.5倍的运行速度)
@@ -30,7 +31,7 @@ const obConfig = {
   identifiersPrefix: '',
   inputFileName: '',
   // 允许将信息记录到控制台。
-  log: true,
+  log: false,
   // 是否启用全局变量和函数名称的混淆
   renameGlobals: false,
   // 禁用模糊处理和生成标识符
@@ -49,7 +50,7 @@ const obConfig = {
   // 删除字符串文字并将它们放在一个特殊的数组中
   stringArray: true,
   // 编码的所有字符串文字stringArray使用base64或rc4并插入即用其解码回在运行时的特殊代码。true（boolean）：stringArray使用编码值base64;false（boolean）：不编码stringArray值;'base64'（string）：stringArray使用编码值base64;'rc4'（string）：stringArray使用编码值rc4。大约慢30-50％base64，但更难获得初始值。建议禁用unicodeEscapeSequence带rc4编码的选项以防止非常大的混淆代码。
-  stringArrayEncoding: false,
+  stringArrayEncoding: true,
   // 调整字符串文字将插入stringArray的概率
   stringArrayThreshold: 0.75,
   // 您可以将混淆代码的目标环境设置为以下之一：Browser;Browser No Eval;Node
@@ -89,7 +90,7 @@ export default defineConfig({
     build: {
       minify: 'esbuild',
       rollupOptions: {
-        plugins: [obfuscatorPlugin(obConfig)]
+        plugins: [obfuscatorPlugin({ ...obConfig, log: true })]
       }
     },
     plugins: [vue(), vueJsx()]

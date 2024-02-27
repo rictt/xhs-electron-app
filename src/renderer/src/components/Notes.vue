@@ -132,7 +132,7 @@ const fetchAccountNotes = async (account: XhsAccount, sync: boolean = false) => 
     state.loading = true
     const notes = await Invoke(IpcChannel.GetNoteList, toRaw(account), sync)
     console.log('notes: ', notes)
-    sync && message.success('同步成功')
+    sync && notes && message.success('同步成功')
     state.tableData = notes || []
   } catch (error) {
     console.log(error)

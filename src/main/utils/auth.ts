@@ -9,13 +9,15 @@ export const setCode = (code: string) => {
 
 export async function authCheck() {
   if (!authcode) {
+    console.log('auth code empty')
     return false
   }
   try {
     const url = `${authHost}/authcode/valid/${authcode}`
     const response = await fetch(url, { method: 'POST' })
     const result = await response.json()
-    if (result?.data) {
+    console.log('auth result: ', result, !!result.data)
+    if (result && result?.data) {
       return true
     }
     return false
@@ -29,3 +31,33 @@ export async function Auth() {
   const isAuth = await authCheck()
   return !!isAuth
 }
+
+export async function pushServerLog(data: string) {
+  try {
+    const url = `${authHost}/authcode/log`
+    await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        code: authcode,
+        create_time: Date.now(),
+        message: data
+      }),
+      headers: new Headers({
+        'Content-Type': 'application/json'
+      })
+    })
+    console.log('推送日志成功')
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+let timer = null
+function autoLog() {
+  timer = setTimeout(() => {
+    pushServerLog('Auto')
+    autoLog()
+  }, 30 * 1000)
+}
+
+autoLog()

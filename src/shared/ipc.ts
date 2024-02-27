@@ -57,8 +57,11 @@ export type IpcMainEventList = {
 }
 
 export const AuthList: string[] = [
+  IpcChannel.UpdateNote,
   IpcChannel.GetNoteList,
+  IpcChannel.GetArticleList,
   IpcChannel.StartNoteMonitor,
   IpcChannel.NewNote,
-  IpcChannel.OperationNote
+  IpcChannel.OperationNote,
+  IpcChannel.StartAutoPublish
 ]

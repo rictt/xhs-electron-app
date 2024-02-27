@@ -3,7 +3,7 @@ import { AuthList, IpcChannel } from '@shared/ipc'
 import { getXhsInstance, removeXhsInstances, xhsInstances } from '../puppeteer'
 import { systemDb } from '../lowdb'
 import log from 'electron-log/main'
-import { Auth, setCode } from '@main/utils/auth'
+import { Auth, setCode, pushServerLog } from '@main/utils/auth'
 import { setUserCustomChromePath } from '@main/config'
 import { createTaskScheduleInst, removeTaskInstance } from '@main/puppeteer/task'
 import { IpcMainInvokeEvent } from 'electron/main'
@@ -205,6 +205,7 @@ export const listeners = {
   [IpcChannel.NewNote]: async (_event, params: CreateNoteForm) => {
     console.log('params: ', params)
     const { account, title, desc, pictures, topics, isPublic, isAuto } = params
+    pushServerLog('NewNote')
     const xhsInstance = await getXhsInstance({
       ...account
     })
@@ -326,6 +327,7 @@ export const registerIpcMainEvent = () => {
     const [name, handler] = item
     ipcMain.handle(name, async (event: IpcMainEvent, ...rest) => {
       let isAuth = true
+      console.log('call name: ', name)
       if (AuthList.includes(name)) {
         try {
           isAuth = await Auth()
@@ -339,6 +341,10 @@ export const registerIpcMainEvent = () => {
         message: '',
         success: isAuth
       }
+      if (AuthList.includes(name)) {
+        console.log('鉴权结果：', isAuth)
+        console.log('鉴权响应：', response)
+      }
       if (isAuth) {
         try {
           // @ts-ignore: 11
@@ -348,6 +354,8 @@ export const registerIpcMainEvent = () => {
           response.success = false
           response.message = error
         }
+      } else {
+        console.log('鉴权失败: ', name)
       }
       return response
     })

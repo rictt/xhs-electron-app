@@ -3,7 +3,8 @@ productName: xFox
 # 加密完打开直接闪退，先忽略
 # 手动加密后的包夹在有问题
 # afterSign: "./build/afterSign.js"
-asar: true
+# asar: true
+afterPack: "./build/afterPack.js"
 directories:
   buildResources: build
 files:
