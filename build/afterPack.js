@@ -9,6 +9,7 @@ exports.default = async ({ appOutDir, packager }) => {
     const archive = await asarmor.open(asarPath)
     archive.patch() // apply default patches
     await archive.write(asarPath)
+    console.log(`ararmor done.`)
   } catch (err) {
     console.error(err)
   }

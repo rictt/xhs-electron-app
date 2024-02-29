@@ -20,13 +20,9 @@ const message = useMessage()
 const updateChromePath = async (showTip = true) => {
   console.log(state.chromePath)
   if (!state.chromePath) return
-  let newPath = state.chromePath
-  if (newPath.startsWith('"')) {
-    newPath = newPath.substring(1)
-  }
-  if (newPath.endsWith('"')) {
-    newPath = newPath.substring(0, newPath.length)
-  }
+  // 去除前后双引号
+  const newPath = state.chromePath.replace(/^"|"$|(?<=^)"|"(?=$)/g, '')
+  console.log('set path: ', newPath)
   state.loading = true
   try {
     await Invoke(IpcChannel.SetChromePath, newPath)

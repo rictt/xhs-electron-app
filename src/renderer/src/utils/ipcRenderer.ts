@@ -1,7 +1,7 @@
 import { AuthList, IpcChannel } from '@shared/ipc'
 import { getAuthCode } from './index'
 
-export async function Invoke(channel: string, ...args: any[]) {
+export async function Invoke(channel: IpcChannel, ...args: any[]) {
   if (AuthList.includes(channel)) {
     const response = await window.electron.ipcRenderer.invoke(IpcChannel.Auth, getAuthCode())
     console.log(response)
