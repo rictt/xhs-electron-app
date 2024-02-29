@@ -49,7 +49,9 @@ export const enum IpcChannel {
 
   StopAutoPublish = 'StopAutoPublish',
 
-  CheckIP = 'CheckIP'
+  CheckIP = 'CheckIP',
+
+  GetUserPublishList = 'GetUserPublishList'
 }
 
 export type IpcMainEventList = {

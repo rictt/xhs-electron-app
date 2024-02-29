@@ -721,12 +721,15 @@ export class Xhs extends EventEmitter {
     }
     if (isLike) {
       result.likeMessage = await this.likeNote()
+      await this.timeout(500)
     }
     if (isCollect) {
       result.collectMessage = await this.collectNote()
+      await this.timeout(500)
     }
     if (isComment) {
       result.commentMessage = (await this.commentNote(commentText)) as any
+      await this.timeout(500)
     }
 
     return result

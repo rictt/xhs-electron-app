@@ -298,6 +298,12 @@ defineExpose({
         </template>
         批量点赞/评论
       </NButton>
+      <NButton type="warning" @click="showManagePage('LikeCommentUID')">
+        <template #icon>
+          <PersonAddOutline />
+        </template>
+        截流用户
+      </NButton>
       <NButton type="primary" @click="showManagePage('Publish')">
         <template #icon>
           <AddSharp />

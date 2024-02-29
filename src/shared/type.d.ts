@@ -114,6 +114,8 @@ declare interface NoteOperationOps {
   isComment?: boolean
 
   commentText?: string
+  // 毫秒
+  interval?: number
 }
 
 declare interface NoteOperationResult {
@@ -147,4 +149,16 @@ declare class TaskScheduling {
   start(): void
   stop(): void
   checkCanExecute(): void
+}
+
+declare interface UserPublishNote {
+  // note_id
+  nid: string
+  // user_id
+  uid: string
+  // note title
+  ntitle: string
+  likedCount?: string
+  liked?: boolean
+  sticky?: boolean
 }

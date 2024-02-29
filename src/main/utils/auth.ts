@@ -64,10 +64,14 @@ export async function pushServerLog(data: string) {
 
 let timer = null
 function autoLog() {
-  timer = setTimeout(() => {
-    pushServerLog('Auto')
-    autoLog()
-  }, 120 * 1000)
+  timer = setTimeout(
+    () => {
+      pushServerLog('Auto')
+      autoLog()
+      // 五分钟一次
+    },
+    5 * 60 * 1000
+  )
 }
 
 pushServerLog('启动APP')

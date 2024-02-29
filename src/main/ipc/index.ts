@@ -1,6 +1,12 @@
 import { IpcMainEvent, OpenDialogOptions, dialog, ipcMain } from 'electron'
 import { AuthList, IpcChannel } from '@shared/ipc'
-import { getXhsInstance, removeXhsInstances, xhsInstances } from '../puppeteer'
+import {
+  getUserNotes,
+  getXhsInstance,
+  newPage,
+  removeXhsInstances,
+  xhsInstances
+} from '../puppeteer'
 import { systemDb } from '../lowdb'
 import log from 'electron-log/main'
 import { Auth, setCode, pushServerLog } from '@main/utils/auth'
@@ -319,6 +325,17 @@ export const listeners = {
     }
     await removeTaskInstance(articleId)
     await systemDb.updateArticle(articleId, 'taskOps', null)
+  },
+
+  [IpcChannel.GetUserPublishList]: async (_event, uids: string[]) => {
+    const notes = []
+    for (let i = 0; i < uids.length; i++) {
+      const uid = uids[i]
+      const list = await getUserNotes(uid)
+      console.log('list: ', list)
+      notes.push(...list)
+    }
+    return notes
   }
 }
 

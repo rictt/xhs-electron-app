@@ -5,6 +5,7 @@ import { globalState } from '@renderer/store'
 import AccountPanel from './AccountPanel.vue'
 import ManagePublish from './ManagePublish.vue'
 import ManageLikeComment from './ManageLikeComment.vue'
+import ManageLikeCommentByUID from './ManageLikeCommentByUID.vue'
 import { onMounted, reactive } from 'vue'
 import { Invoke } from '@renderer/utils/ipcRenderer'
 import { getChromePath, setChromePath } from '@renderer/utils/index'
@@ -96,6 +97,7 @@ defineEmits(['add-account'])
       <div class="content-body">
         <ManagePublish v-show="globalState.activeComponetName === 'Publish'" />
         <ManageLikeComment v-show="globalState.activeComponetName === 'LikeComment'" />
+        <ManageLikeCommentByUID v-show="globalState.activeComponetName === 'LikeCommentUID'" />
       </div>
     </div>
   </div>

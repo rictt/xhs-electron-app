@@ -96,3 +96,49 @@ export async function getXhsInstance(params: GetInstanceParams) {
 
   return xhs
 }
+
+export async function newPage(): Promise<Page> {
+  log.info('getDefaultOsPath(): ', config.getDefaultOsPath())
+  if (!__browser) {
+    __browser = await launch({
+      defaultViewport: null,
+      devtools: false,
+      headless: !isDev,
+      executablePath: config.getDefaultOsPath()
+    })
+  }
+
+  return await __browser.newPage()
+}
+
+export async function getUserNotes(uid: string): Promise<UserPublishNote[]> {
+  const page = await newPage()
+  const href = `https://www.xiaohongshu.com/user/profile/${uid}`
+  console.log(`获取用户 ${uid} 笔记中: `, href)
+  await page.goto(href)
+  try {
+    await page.waitForSelector('.note-item .title', { timeout: 1000 * 10 })
+    let notes: any[] = await page.evaluate(() => {
+      // @ts-ignore: 忽略
+      return JSON.parse(JSON.stringify(window?.__INITIAL_STATE__?.user?.notes?.value?.[0] || []))
+    })
+    notes = notes.map((e) => {
+      return {
+        nid: e.id,
+        uid: e?.noteCard?.user?.userId,
+        ntitle: e?.noteCard?.displayTitle,
+        sticky: e?.noteCard?.interactInfo?.sticky,
+        liked: e?.noteCard?.interactInfo?.liked
+      } as UserPublishNote
+    })
+
+    console.log('111notes: ', notes)
+    return notes
+  } catch (error) {
+    console.log('uid可能错误, 没有笔记: ', uid)
+    await page.waitForSelector('.user-page .error', { timeout: 1000 * 5 })
+    return []
+  } finally {
+    await page.close()
+  }
+}
