@@ -4,6 +4,10 @@ import { app } from 'electron'
 import { join } from 'path'
 
 type Data = {
+  // 一台机器一个，默认写入本地
+  // 填写授权码的时候，顺便把use_id带上
+  // 跟授权码进行关联，如果一个授权码使用期内，超过3个，就禁止使用
+  use_id: string
   accounts: XhsAccount[]
   notes: NoteDataItem[]
   comments: CommentDataItem[]
@@ -17,6 +21,7 @@ class SystemDB {
   }
   constructor() {
     const defaultData: Data = {
+      use_id: '',
       accounts: [],
       notes: [],
       comments: [],
@@ -35,16 +40,13 @@ class SystemDB {
   }
 
   async init() {
-    // const ids = []
-    // this.db.data.accounts = this.db.data.accounts.filter((e) => {
-    //   if (ids.includes(e.user_id)) {
-    //     return false
-    //   }
-    //   ids.push(e.user_id)
-    //   return true
-    // })
-    // await this.db.write()
     await this.db.read()
+    if (!this.db.data.use_id) {
+      this.db.data.use_id =
+        Math.random().toString(16).slice(-12) + Math.random().toString(16).slice(-12)
+      await this.db.write()
+    }
+    console.log('use_id: ', this.db.data.use_id)
   }
 
   async addAccount(account: XhsAccount) {

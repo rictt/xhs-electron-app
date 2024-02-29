@@ -1,3 +1,5 @@
+import { systemDb } from '@main/lowdb'
+
 // export let authcode = '465D73BE16E2'
 export let authcode = ''
 // export const authHost = `http://localhost:3000`
@@ -14,7 +16,15 @@ export async function authCheck() {
   }
   try {
     const url = `${authHost}/authcode/valid/${authcode}`
-    const response = await fetch(url, { method: 'POST' })
+    const useId = systemDb.data.use_id || ''
+    const body = JSON.stringify(useId ? { use_id: useId } : {})
+    const response = await fetch(url, {
+      method: 'POST',
+      body,
+      headers: new Headers({
+        'Content-Type': 'application/json'
+      })
+    })
     const result = await response.json()
     console.log('auth result: ', result, !!result.data)
     if (result && result?.data) {
@@ -57,7 +67,8 @@ function autoLog() {
   timer = setTimeout(() => {
     pushServerLog('Auto')
     autoLog()
-  }, 30 * 1000)
+  }, 120 * 1000)
 }
 
+pushServerLog('启动APP')
 autoLog()
