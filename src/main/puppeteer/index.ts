@@ -117,7 +117,7 @@ export async function getUserNotes(uid: string): Promise<UserPublishNote[]> {
   console.log(`获取用户 ${uid} 笔记中: `, href)
   await page.goto(href)
   try {
-    await page.waitForSelector('.note-item .title', { timeout: 1000 * 10 })
+    await page.waitForSelector('.note-item .title', { timeout: 1000 * 5 })
     let notes: any[] = await page.evaluate(() => {
       // @ts-ignore: 忽略
       return JSON.parse(JSON.stringify(window?.__INITIAL_STATE__?.user?.notes?.value?.[0] || []))
@@ -136,7 +136,18 @@ export async function getUserNotes(uid: string): Promise<UserPublishNote[]> {
     return notes
   } catch (error) {
     console.log('uid可能错误, 没有笔记: ', uid)
-    await page.waitForSelector('.user-page .error', { timeout: 1000 * 5 })
+    try {
+      const text = await page.$eval('.empty-text', (node: HTMLElement) => {
+        return node.innerText || ''
+      })
+      if (text.indexOf('没有发布') !== -1) {
+        console.log('用户没有笔记: ', uid)
+        return []
+      }
+      await page.waitForSelector('.user-page .error', { timeout: 1000 * 5 })
+    } catch (error) {
+      console.log('等待user-page .error失败', error)
+    }
     return []
   } finally {
     await page.close()
