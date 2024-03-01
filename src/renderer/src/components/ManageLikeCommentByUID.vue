@@ -114,19 +114,19 @@ const createResultColumns = () => {
     },
     {
       title: '笔记标题',
-      key: 'ntitle',
+      key: 'noteTitle',
       ellipsis: {
         tooltip: true
       }
     },
     {
       title: '作品链接',
-      key: 'nid',
+      key: 'noteId',
       ellipsis: {
         tooltip: true
       },
       render: (row) => {
-        return `https://www.xiaohongshu.com/explore/${row.nid}`
+        return `https://www.xiaohongshu.com/explore/${row.noteId}`
       }
     },
     {
@@ -143,6 +143,10 @@ const createResultColumns = () => {
       title: '是否评论',
       key: 'isComment',
       render: (row) => (row.isComment ? '是' : '')
+    },
+    {
+      title: '说明',
+      key: 'remark'
     }
   ] as DataTableColumn[]
 }
@@ -152,18 +156,107 @@ const state = reactive({
   // uidText: '5b72dbad0e82130001212d31\n5f35634d000000000100621e',
   sticky: false,
   loading: false,
+  nextLoading: false,
   tableData: [] as UserPublishNote[],
+  // tableData: [
+  //   {
+  //     nid: '65e12f17000000000b00d9b2',
+  //     uid: '658a3699000000001f0381e0',
+  //     ntitle: '发一张照片 证明你有猫猫',
+  //     sticky: false,
+  //     liked: false
+  //   },
+  //   {
+  //     nid: '65e027b40000000003032421',
+  //     uid: '658a3699000000001f0381e0',
+  //     ntitle: '10斤！留下你们家的蓝胖子',
+  //     sticky: false,
+  //     liked: false
+  //   },
+  //   {
+  //     nid: '65df4cb6000000000b01a58b',
+  //     uid: '658a3699000000001f0381e0',
+  //     ntitle: '好近！闻到小猫味了！！！',
+  //     sticky: false,
+  //     liked: false
+  //   },
+  //   {
+  //     nid: '65c49e2d000000002c039170',
+  //     uid: '5c5012ab000000001103942f',
+  //     ntitle: '江西鲲茶 ',
+  //     sticky: false,
+  //     liked: false
+  //   },
+  //   {
+  //     nid: '658f90df000000001d024ee0',
+  //     uid: '5c5012ab000000001103942f',
+  //     ntitle: '好望市级 ',
+  //     sticky: false,
+  //     liked: false
+  //   },
+  //   {
+  //     nid: '6538af64000000001e0304eb',
+  //     uid: '5c5012ab000000001103942f',
+  //     ntitle: '我也是有DQ帕恰狗毛绒包的人了！！',
+  //     sticky: false,
+  //     liked: false
+  //   }
+  // ],
   pagination: {
     pageSize: 10
   },
   extractNum: '3',
   likeIndex: '1',
   collectIndex: '2',
-  commentIndex: '3',
+  commentIndex: '',
   interval: '3',
   commentText: '',
   selectAccountList: [],
   allTableData: [] as UserPublishNote[],
+  // allTableData: [
+  //   {
+  //     nid: '65e12f17000000000b00d9b2',
+  //     uid: '658a3699000000001f0381e0',
+  //     ntitle: '发一张照片 证明你有猫猫',
+  //     sticky: false,
+  //     liked: false
+  //   },
+  //   {
+  //     nid: '65e027b40000000003032421',
+  //     uid: '658a3699000000001f0381e0',
+  //     ntitle: '10斤！留下你们家的蓝胖子',
+  //     sticky: false,
+  //     liked: false
+  //   },
+  //   {
+  //     nid: '65df4cb6000000000b01a58b',
+  //     uid: '658a3699000000001f0381e0',
+  //     ntitle: '好近！闻到小猫味了！！！',
+  //     sticky: false,
+  //     liked: false
+  //   },
+  //   {
+  //     nid: '65c49e2d000000002c039170',
+  //     uid: '5c5012ab000000001103942f',
+  //     ntitle: '江西鲲茶 ',
+  //     sticky: false,
+  //     liked: false
+  //   },
+  //   {
+  //     nid: '658f90df000000001d024ee0',
+  //     uid: '5c5012ab000000001103942f',
+  //     ntitle: '好望市级 ',
+  //     sticky: false,
+  //     liked: false
+  //   },
+  //   {
+  //     nid: '6538af64000000001e0304eb',
+  //     uid: '5c5012ab000000001103942f',
+  //     ntitle: '我也是有DQ帕恰狗毛绒包的人了！！',
+  //     sticky: false,
+  //     liked: false
+  //   }
+  // ],
   tableColumns: createColumns(),
   resultTableData: [],
   resultTableColumns: createResultColumns()
@@ -240,7 +333,7 @@ const submitNext = async () => {
     sticky,
     selectAccountList
   } = state
-  if (!commentText) {
+  if (commentIndex && !commentText) {
     message.error('请输入评论内容')
     return
   }
@@ -267,39 +360,71 @@ const submitNext = async () => {
     const account = globalState.accountList.find((e) => e.user_id === selectAccountList[i])
     if (account) {
       for (let j = 0; j < notes.length; j++) {
-        const isLike = likeIndex ? (j % 3) + 1 === parseInt(likeIndex) : true
-        const isCollect = collectIndex ? (j % 3) + 1 === parseInt(collectIndex) : true
-        const isComment = commentIndex ? (j % 3) + 1 === parseInt(commentIndex) : true
+        const isLike = likeIndex ? (j % 3) + 1 === parseInt(likeIndex) : false
+        const isCollect = collectIndex ? (j % 3) + 1 === parseInt(collectIndex) : false
+        const isComment = commentIndex ? (j % 3) + 1 === parseInt(commentIndex) : false
         const note = notes[j]
-        operations.push({
-          account: toRaw(account),
-          note_link: `https://www.xiaohongshu.com/explore/${note.nid}`,
-          isLike,
-          isCollect,
-          isComment,
-          commentText: commentText,
-          interval: interval ? parseInt(interval) * 1000 : null
-        })
+        if (isLike || isCollect || isComment) {
+          operations.push({
+            account: toRaw(account),
+            noteId: note.nid,
+            noteTitle: note.ntitle,
+            note_link: `https://www.xiaohongshu.com/explore/${note.nid}`,
+            isLike,
+            isCollect,
+            isComment,
+            commentText: commentText,
+            interval: interval ? parseInt(interval) * 1000 : null
+          })
+        }
       }
     }
   }
 
   console.log('代执行操作笔记：', notes)
   console.log('含账号操作记录条数为：', operations)
-  state.loading = true
-  const result = []
+  const responseList = []
   for (let z = 0; z < operations.length; z++) {
     const opts = operations[z]
-    const response = await Invoke(IpcChannel.OperationNote, opts as NoteOperationOps)
-    result.push(response)
-    if (interval) {
-      const __time = parseInt(interval) * 1000
-      await new Promise((resolve) => setTimeout(resolve, __time))
+    responseList.push({
+      ...opts,
+      account: opts.account,
+      uid: opts.account?.user_id,
+      noteTitle: opts?.noteTitle,
+      noteId: opts?.noteId,
+      remark: '等待执行'
+    })
+  }
+
+  state.resultTableData = [...responseList]
+  state.nextLoading = true
+  for (let z = 0; z < operations.length; z++) {
+    const opts = operations[z]
+    state.resultTableData[z].remark = '执行中...'
+    // const response = {
+    //   likeMessage: '点赞成功',
+    //   collectMessage: '收藏失败',
+    //   commentMessage: ''
+    // }
+    try {
+      const response = await Invoke(IpcChannel.OperationNote, opts as NoteOperationOps)
+      if (response) {
+        const { likeMessage, collectMessage, commentMessage } = response
+        const messages = [likeMessage, collectMessage, commentMessage].filter((e) => e).join(';')
+        state.resultTableData[z].remark = messages
+      }
+      if (interval) {
+        const __time = parseInt(interval) * 1000
+        await new Promise((resolve) => setTimeout(resolve, __time))
+      }
+    } catch (error) {
+      state.resultTableData[z].remark = '执行失败'
+      message.error(error)
     }
   }
-  state.loading = false
+  state.nextLoading = false
   message.success('执行成功')
-  console.log('result: ', result)
+  console.log('result: ', responseList)
 }
 
 onMounted(async () => {
@@ -375,7 +500,7 @@ onMounted(async () => {
                   <n-input
                     v-model:value="state.likeIndex"
                     style="width: 140px"
-                    placeholder="不填点赞所有"
+                    placeholder="不填不点赞"
                   />
                 </n-input-group>
               </n-form-item>
@@ -385,7 +510,7 @@ onMounted(async () => {
                   <n-input
                     v-model:value="state.collectIndex"
                     style="width: 140px"
-                    placeholder="不填收藏所有"
+                    placeholder="不填不收藏"
                   />
                 </n-input-group>
               </n-form-item>
@@ -395,7 +520,7 @@ onMounted(async () => {
                   <n-input
                     v-model:value="state.commentIndex"
                     style="width: 140px"
-                    placeholder="不填评论所有"
+                    placeholder="不填不评论"
                   />
                 </n-input-group>
               </n-form-item>
@@ -447,7 +572,9 @@ onMounted(async () => {
 
         <n-form-item>
           <div style="width: 100%; display: flex; align-items: center; justify-content: center">
-            <n-button type="primary" @click="submitNext">执行截流</n-button>
+            <n-button type="primary" :loading="state.nextLoading" @click="submitNext"
+              >执行截流</n-button
+            >
           </div>
         </n-form-item>
       </template>
@@ -460,8 +587,8 @@ onMounted(async () => {
           size="small"
           :columns="state.resultTableColumns"
           :data="state.resultTableData"
-          :pagination="state.pagination"
         />
+        <br />
       </div>
     </n-form>
   </n-spin>

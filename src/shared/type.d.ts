@@ -116,6 +116,8 @@ declare interface NoteOperationOps {
   commentText?: string
   // 毫秒
   interval?: number
+  noteId?: string
+  noteTitle?: string
 }
 
 declare interface NoteOperationResult {

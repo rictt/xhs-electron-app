@@ -115,9 +115,14 @@ export async function getUserNotes(uid: string): Promise<UserPublishNote[]> {
   const page = await newPage()
   const href = `https://www.xiaohongshu.com/user/profile/${uid}`
   console.log(`获取用户 ${uid} 笔记中: `, href)
-  await page.goto(href)
   try {
-    await page.waitForSelector('.note-item .title', { timeout: 1000 * 5 })
+    await page.goto(href)
+  } catch (error) {
+    console.log(error)
+    return []
+  }
+  try {
+    await page.waitForSelector('.note-item .title', { timeout: 1000 * 6 })
     let notes: any[] = await page.evaluate(() => {
       // @ts-ignore: 忽略
       return JSON.parse(JSON.stringify(window?.__INITIAL_STATE__?.user?.notes?.value?.[0] || []))

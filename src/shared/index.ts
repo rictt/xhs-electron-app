@@ -1,4 +1,4 @@
-export const version = '1.2.1'
+export const version = '1.2.3'
 
 import type { IpcMainInvokeEvent } from 'electron'
 
